@@ -1,0 +1,9 @@
+name = "portfolio-card-react"
+compatibility_date = "2025-07-07"
+
+[build]
+command = "npm run build"
+cwd = "."
+
+[site]
+bucket = "./build" 
