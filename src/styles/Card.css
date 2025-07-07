@@ -1,0 +1,274 @@
+body {
+  background-color: #ffffff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+
+.card-container {
+  position: relative;
+  perspective: 1000px;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2vw; /* Add a little padding for mobile */
+  box-sizing: border-box;
+}
+
+.card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 17 / 11;
+  max-width: 500px;
+  max-height: 80vw;
+  transform-style: preserve-3d;
+  user-select: none; /* Prevent selection for all text inside the card */
+}
+
+.card-side {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+  backface-visibility: hidden; /* <-- Add this line */
+}
+
+.card-side.front {
+  transform: rotateY(0deg);
+  z-index: 2; /* Ensure front side is above back side */
+}
+
+.card-side.back {
+  transform: rotateY(180deg);
+}
+
+.front {
+  background: #ffffff;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-family: 'Satoshi', sans-serif;
+  font-weight: 600;
+}
+
+.back {
+  background: #ffffff;
+  color: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.corner-hover {
+  position: fixed;
+  z-index: 50;
+  pointer-events: auto;
+  background: rgba(255, 0, 0, 0);
+}
+
+.business-card {
+  width: 100%;
+  height: 100%;
+  font-family: 'Satoshi', Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 24px 24px 16px 24px;
+  box-sizing: border-box;
+  position: relative;
+  z-index: 10;
+}
+
+.bc-row {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 0.10em;
+}
+
+.bc-row.bc-tight {
+  margin-bottom: -1em; /* No space between designer. and TONY TOSKALIO */
+}
+
+.bc-row.bc-tight + .bc-row.bc-tight {
+  margin-top: -0.2em; /* Try -0.2em or adjust as needed */
+}
+
+.bc-space {
+  margin-bottom: 3em; /* Larger space after the name */
+}
+
+
+.bc-email,
+.bc-tel {
+  flex-grow: 1;
+  text-align: right;
+}
+
+.bc-name {
+  font-size: 3.5rem;
+  font-weight: 600;   /* Only the name is bold */
+  letter-spacing: 0.01em;
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+  text-transform: uppercase;
+  user-select: text; /* Allow selection only for the name */
+}
+
+.bc-email a,
+.bc-tel a {
+  color: #000000;
+  text-decoration: none;
+}
+
+.bc-email a:hover,
+.bc-tel a:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.bc-email,
+.bc-tel {
+  margin-left: 0.5em; /* Reduce space between label and value */
+}
+
+/* Optional: Make sure the card never overflows on very small screens */
+@media (max-width: 600px) {
+  .card {
+    max-width: 98vw;
+    max-height: 60vw;
+  }
+  .card-container {
+    padding: 1vw;
+  }
+}
+
+/* Hide card and show message in portrait mode */
+@media screen and (orientation: portrait) {
+  .card-container {
+    display: none !important;
+  }
+  .rotate-message {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-size: 1.5rem;
+    color: #333;
+    background: #fff;
+    text-align: center;
+    padding: 2em;
+  }
+}
+
+/* Show card and hide message in landscape */
+@media screen and (orientation: landscape) {
+  .card-container {
+    display: flex !important;
+  }
+  .rotate-message {
+    display: none !important;
+  }
+}
+
+.rotate-message {
+  font-family: 'Fira Mono', monospace;
+  text-transform: lowercase;
+  font-size: 1.2rem;
+  letter-spacing: 0.01em;
+  color: #333;
+  text-align: center;
+  padding: 2em;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Make text selection yellow */
+::selection {
+  background: rgb(252, 252, 90);
+  color: #000; /* Optional: makes selected text readable */
+}
+
+/* For Firefox */
+::-moz-selection {
+  background: rgb(252, 252, 90);
+  color: #000;
+}
+
+/* Make all text regular by default */
+.business-card,
+.bc-row,
+.bc-small,
+.bc-email,
+.bc-tel {
+  font-weight: 400;
+}
+
+/* Only the name is bold */
+.bc-name {
+  font-size: 3.5rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  margin-top: 0.1em;
+  margin-bottom: 0.1em;
+  text-transform: uppercase;
+}
+
+.aboutme-link {
+  color: inherit;
+  text-decoration: none;
+  display: inline-block;
+  padding: 4px 10px 4px 0;
+  position: relative;
+  z-index: 10;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.aboutme-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 600px), (max-height: 500px) {
+  .corner-hover {
+    display: none !important;
+  }
+}
+
+.card-exit-left {
+  animation: card-exit-left 0.6s cubic-bezier(.77,0,.18,1) forwards;
+}
+
+@keyframes card-exit-left {
+  to {
+    transform: translateX(-120vw) scale(0.95) rotateZ(-8deg);
+    opacity: 0.2;
+  }
+}
+
+/* Fade in for aboutme-page */
+.aboutme-page-container {
+  opacity: 0;
+  animation: fade-in-page 0.7s 0.3s cubic-bezier(.77,0,.18,1) forwards;
+}
+
+@keyframes fade-in-page {
+  to {
+    opacity: 20;
+  }
+}
+
