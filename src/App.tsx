@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Card from "./components/Card";
 import About from "./components/AboutSquare";
 import "./styles/Card.css";
@@ -9,6 +9,7 @@ const App: React.FC = () => (
     <Routes>
       <Route path="/" element={<Card />} />
       <Route path="/about" element={<About />} />
+      <Route path="/about-me" element={<Navigate to="/about" replace />} />
     </Routes>
   </Router>
 );
