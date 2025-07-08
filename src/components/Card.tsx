@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import '../styles/Card.css';
 import qrcode from '../assets/qrcode.svg';
@@ -7,6 +7,7 @@ const Card: React.FC = () => {
   const [flipped, setFlipped] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [exit, setExit] = useState(false); // NEW
+  const [enter, setEnter] = useState(true); // For slide-in
   const cardRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -73,13 +74,19 @@ const Card: React.FC = () => {
     e.stopPropagation();
     setExit(true);
     setTimeout(() => {
-      navigate("/about-me");
+      navigate("/about");
     }, 600); // Match the animation duration
   };
 
+  useEffect(() => {
+    document.title = "tony's card";
+    setEnter(true);
+    const timer = setTimeout(() => setEnter(false), 600);
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
     <>
-      {/* Show this above your card-container */}
       <div className="rotate-message">
         please rotate your phone horizontally.
       </div>
@@ -90,13 +97,16 @@ const Card: React.FC = () => {
         onMouseLeave={handleMouseLeave}
       >
         <div
-          className={`card${flipped ? " flipped" : ""}${exit ? " card-exit-left" : ""}`}
+          className={`card${flipped ? " flipped" : ""}${exit ? " card-exit-left" : ""}${enter ? " card-enter-left" : ""}`}
           ref={cardRef}
           style={{
             transform: getTransform(),
-            transition: exit
-              ? 'transform 0.6s cubic-bezier(.77,0,.18,1)'
-              : 'transform 0.25s cubic-bezier(.03,.98,.52,.99)',
+            transition:
+              exit
+                ? 'transform 0.6s cubic-bezier(.77,0,.18,1)'
+                : enter
+                ? 'transform 0.6s cubic-bezier(.77,0,.18,1)'
+                : 'transform 0.25s cubic-bezier(.03,.98,.52,.99)',
           }}
           onClick={handleCardClick}
         >
@@ -104,7 +114,7 @@ const Card: React.FC = () => {
             <div className="business-card">
               <div className="bc-row bc-tight">
                 <a
-                  href="/about-me"
+                  href="/about"
                   className="aboutme-link"
                   onClick={handleDesignerClick}
                 >
