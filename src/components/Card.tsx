@@ -142,8 +142,8 @@ const Card: React.FC = () => {
               <div className="bc-row">
                 <span className="bc-small">kontakt</span>
                 <span className="bc-email">
-                  <a href="mailto:thomasdascaliuc01@gmail.com" onClick={stopFlip}>
-                    tony@toskalio.com
+                  <a href="mailto:tony@tonytoskal.io" onClick={stopFlip}>
+                    tony@tonytoskal.io
                   </a>
                 </span>
               </div>
