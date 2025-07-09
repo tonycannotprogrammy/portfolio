@@ -292,12 +292,11 @@ const About: React.FC = () => {
     // Shuffle palette and assign to overlays
     const shuffled = [...palette].sort(() => Math.random() - 0.5);
     return overlays.map((_, i) => shuffled[i % shuffled.length]);
-  }, [overlays.length]);
+  }, [overlays]);
 
   // Collect all overlay links for links-only mode
   const allLinks = overlays.map((overlay, idx) => {
     if (!LINK_CLASSES[overlay.word]) return null;
-    const isLink = animationDone && !fadeOut && (!!overlay.onClick || !!overlay.href);
     // Responsive font size: larger in portrait, smaller in landscape
     let fontSize = 'clamp(1.3rem, 6vw, 2.8rem)';
     if (isMobile() && isLandscape()) fontSize = 'clamp(1.1rem, 4vw, 2.2rem)';
@@ -305,7 +304,7 @@ const About: React.FC = () => {
       <span
         key={overlay.word}
         className={LINK_CLASSES[overlay.word] + ' about-link-list'}
-        onClick={isLink ? (e => {
+        onClick={(animationDone && !fadeOut && (!!overlay.onClick || !!overlay.href)) ? (e => {
           if (overlay.onClick) return overlay.onClick(e);
           if (overlay.href) {
             e.preventDefault();
