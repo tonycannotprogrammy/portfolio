@@ -19,6 +19,11 @@
   white-space: pre-wrap;
   word-break: break-word;
   cursor: pointer;
+  padding: 2.5vw 2vw 3vw 2vw;
+  box-sizing: border-box;
+  background: none;
+  border-radius: 0;
+  overflow: visible;
 }
 
 .overlay-img {

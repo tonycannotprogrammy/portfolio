@@ -71,7 +71,7 @@ const About: React.FC = () => {
     setAnimationDone(false);
     setFrozenDisplay(null);
     overlayRotations.current = {}; // Reset rotations on new text
-    document.title = "tony's about";
+    document.title = "about tony.";
   }, [about]);
 
   useEffect(() => {
@@ -281,38 +281,87 @@ const About: React.FC = () => {
   // Collect all overlay links for links-only mode
   const allLinks = overlays.map((overlay, idx) => {
     if (!LINK_CLASSES[overlay.word]) return null;
-    // Responsive font size: larger in portrait, smaller in landscape
     let fontSize = 'clamp(1.3rem, 6vw, 2.8rem)';
     if (isMobile() && isLandscape()) fontSize = 'clamp(1.1rem, 4vw, 2.2rem)';
-    return (
-      <span
-        key={overlay.word}
-        className={LINK_CLASSES[overlay.word] + ' about-link-list'}
-        onClick={(animationDone && !fadeOut && (!!overlay.onClick || !!overlay.href)) ? (e => {
-          if (overlay.onClick) return overlay.onClick(e);
-          if (overlay.href) {
-            e.preventDefault();
-            window.open(overlay.href, '_blank', 'noopener');
-          }
-        }) : undefined}
-        style={{
-          display: 'block',
-          fontSize,
-          fontWeight: 700,
-          margin: 'min(2vw, 18px) 0',
-          textAlign: 'center',
-          transform: 'none',
-          color: linkColors[idx],
-          transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1), color 0.5s cubic-bezier(.77,0,.18,1)',
-          opacity: showLinksOnly ? 1 : 0,
-          pointerEvents: showLinksOnly ? 'auto' : 'none',
-          wordBreak: 'break-word',
-          whiteSpace: isMobile() && isLandscape() ? 'nowrap' : undefined,
-        }}
-      >
-        {overlay.word}
-      </span>
-    );
+    // Internal links: use navigate, external: use <a href target="_blank">
+    if (overlay.href && overlay.href.startsWith('/')) {
+      return (
+        <span
+          key={overlay.word}
+          className={LINK_CLASSES[overlay.word] + ' about-link-list'}
+          onClick={animationDone && !fadeOut ? () => navigate(overlay.href!) : undefined}
+          style={{
+            display: 'block',
+            fontSize,
+            fontWeight: 700,
+            margin: 'min(2vw, 18px) 0',
+            textAlign: 'center',
+            transform: 'none',
+            color: linkColors[idx],
+            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1), color 0.5s cubic-bezier(.77,0,.18,1)',
+            opacity: showLinksOnly ? 1 : 0,
+            pointerEvents: showLinksOnly ? 'auto' : 'none',
+            wordBreak: 'break-word',
+            whiteSpace: isMobile() && isLandscape() ? 'nowrap' : undefined,
+            cursor: animationDone && !fadeOut ? 'pointer' : 'default',
+          }}
+        >
+          {overlay.word}
+        </span>
+      );
+    } else if (overlay.href) {
+      return (
+        <a
+          key={overlay.word}
+          className={LINK_CLASSES[overlay.word] + ' about-link-list'}
+          href={overlay.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            display: 'block',
+            fontSize,
+            fontWeight: 700,
+            margin: 'min(2vw, 18px) 0',
+            textAlign: 'center',
+            transform: 'none',
+            color: linkColors[idx],
+            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1), color 0.5s cubic-bezier(.77,0,.18,1)',
+            opacity: showLinksOnly ? 1 : 0,
+            pointerEvents: showLinksOnly ? 'auto' : 'none',
+            wordBreak: 'break-word',
+            whiteSpace: isMobile() && isLandscape() ? 'nowrap' : undefined,
+            cursor: animationDone && !fadeOut ? 'pointer' : 'default',
+          }}
+        >
+          {overlay.word}
+        </a>
+      );
+    } else {
+      return (
+        <span
+          key={overlay.word}
+          className={LINK_CLASSES[overlay.word] + ' about-link-list'}
+          onClick={animationDone && !fadeOut && overlay.onClick ? overlay.onClick : undefined}
+          style={{
+            display: 'block',
+            fontSize,
+            fontWeight: 700,
+            margin: 'min(2vw, 18px) 0',
+            textAlign: 'center',
+            transform: 'none',
+            color: linkColors[idx],
+            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1), color 0.5s cubic-bezier(.77,0,.18,1)',
+            opacity: showLinksOnly ? 1 : 0,
+            pointerEvents: showLinksOnly ? 'auto' : 'none',
+            wordBreak: 'break-word',
+            whiteSpace: isMobile() && isLandscape() ? 'nowrap' : undefined,
+            cursor: animationDone && !fadeOut ? 'pointer' : 'default',
+          }}
+        >
+          {overlay.word}
+        </span>
+      );
+    }
   });
 
   // Helper to render animated text with a span on the last character for autoscroll
