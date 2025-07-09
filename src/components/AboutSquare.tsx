@@ -155,7 +155,7 @@ const About: React.FC = () => {
     onClick?: (e: React.MouseEvent) => void;
     href?: string;
   };
-  const overlays: OverlayConfig[] = [
+  const overlays: OverlayConfig[] = useMemo(() => [
     {
       word: 'tony toskalio',
       onClick: handleNameClick,
@@ -197,7 +197,7 @@ const About: React.FC = () => {
       onClick: undefined,
       href: '#',
     },
-  ];
+  ], [handleNameClick]);
 
   // Helper to process overlays in a single pass
   const renderTextWithOverlays = (text: string, forceTransform = false) => {
@@ -220,45 +220,26 @@ const About: React.FC = () => {
         // Push text before the match
         if (nextIdx > i) result.push(text.slice(i, nextIdx));
         // Overlay logic
-        if (nextMatch === 'social' && animationDone && !fadeOut) {
-          // Now just render the link as before
-          const isLink = true;
-          let className = LINK_CLASSES[nextMatch];
-          if (forceTransform && className) className += ' about-link-flip';
-          result.push(
-            <span
-              key={nextIdx + '-' + nextMatch}
-              className={className}
-              onClick={e => {
-                e.preventDefault();
-                window.open('/socials', '_blank', 'noopener');
-              }}
-            >
-              {text.slice(nextIdx, nextIdx + nextMatch.length)}
-            </span>
-          );
-        } else {
-          const isLink = animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href);
-          const handleOverlayClick = (e: React.MouseEvent) => {
-            if (!isLink) return;
-            if (matchOverlay && matchOverlay.onClick) return matchOverlay.onClick(e);
-            if (matchOverlay && matchOverlay.href) {
-              e.preventDefault();
-              window.open(matchOverlay.href, '_blank', 'noopener');
-            }
-          };
-          let className = isLink ? LINK_CLASSES[nextMatch] : '';
-          if (forceTransform && className) className += ' about-link-flip';
-          result.push(
-            <span
-              key={nextIdx + '-' + nextMatch}
-              className={className}
-              onClick={isLink ? handleOverlayClick : undefined}
-            >
-              {text.slice(nextIdx, nextIdx + nextMatch.length)}
-            </span>
-          );
-        }
+        const handleOverlayClick = (e: React.MouseEvent) => {
+          if (!(animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href))) return;
+          if (matchOverlay && matchOverlay.onClick) return matchOverlay.onClick(e);
+          if (matchOverlay && matchOverlay.href) {
+            e.preventDefault();
+            window.open(matchOverlay.href, '_blank', 'noopener');
+          }
+        };
+        // On mobile, always add a modifier class for transform
+        let className = (animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href)) ? LINK_CLASSES[nextMatch] : '';
+        if (forceTransform && className) className += ' about-link-flip';
+        result.push(
+          <span
+            key={nextIdx + '-' + nextMatch}
+            className={className}
+            onClick={(animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href)) ? handleOverlayClick : undefined}
+          >
+            {text.slice(nextIdx, nextIdx + nextMatch.length)}
+          </span>
+        );
         i = nextIdx + nextMatch.length;
       } else {
         // No more overlays, push the rest
