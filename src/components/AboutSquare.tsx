@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AboutSquare.css';
 
@@ -138,66 +138,66 @@ const About: React.FC = () => {
     }
   };
 
-  // Handler for 'tony toskalio' link
-  const handleNameClick = (e: React.MouseEvent) => {
-    if (!animationDone) return;
-    e.preventDefault();
-    setFrozenDisplay(displayed); // Freeze the current text
-    setFadeOut(true);
-    setTimeout(() => {
-      navigate('/');
-    }, 600); // Match fade duration
-  };
-
   // Overlay configuration (moved below handleNameClick)
   type OverlayConfig = {
     word: string;
     onClick?: (e: React.MouseEvent) => void;
     href?: string;
   };
-  const overlays: OverlayConfig[] = useMemo(() => [
-    {
-      word: 'tony toskalio',
-      onClick: handleNameClick,
-      href: undefined,
-    },
-    {
-      word: 'syπthesizer.',
-      onClick: undefined,
-      href: 'https://synthesizer.cargo.site',
-    },
-    {
-      word: 'htl donaustadt',
-      onClick: undefined,
-      href: 'https://htl-donaustadt.at',
-    },
-    // New links
-    {
-      word: 'social',
-      onClick: undefined,
-      href: '/socials', // open the new social slot page
-    },
-    {
-      word: 'drawing',
-      onClick: undefined,
-      href: '#',
-    },
-    {
-      word: 'the mundane',
-      onClick: undefined,
-      href: '/mundane', // open the new video page
-    },
-    {
-      word: 'graphic and logo design',
-      onClick: undefined,
-      href: '#',
-    },
-    {
-      word: 'photography',
-      onClick: undefined,
-      href: '#',
-    },
-  ], [handleNameClick]);
+  const overlays: OverlayConfig[] = useMemo(() => {
+    const handleNameClick = (e: React.MouseEvent) => {
+      if (!animationDone) return;
+      e.preventDefault();
+      setFrozenDisplay(displayed); // Freeze the current text
+      setFadeOut(true);
+      setTimeout(() => {
+        navigate('/');
+      }, 600); // Match fade duration
+    };
+    return [
+      {
+        word: 'tony toskalio',
+        onClick: handleNameClick,
+        href: undefined,
+      },
+      {
+        word: 'syπthesizer.',
+        onClick: undefined,
+        href: 'https://synthesizer.cargo.site',
+      },
+      {
+        word: 'htl donaustadt',
+        onClick: undefined,
+        href: 'https://htl-donaustadt.at',
+      },
+      // New links
+      {
+        word: 'social',
+        onClick: undefined,
+        href: '/socials', // open the new social slot page
+      },
+      {
+        word: 'drawing',
+        onClick: undefined,
+        href: '#',
+      },
+      {
+        word: 'the mundane',
+        onClick: undefined,
+        href: '/mundane', // open the new video page
+      },
+      {
+        word: 'graphic and logo design',
+        onClick: undefined,
+        href: '#',
+      },
+      {
+        word: 'photography',
+        onClick: undefined,
+        href: '#',
+      },
+    ];
+  }, [animationDone, displayed, navigate, setFadeOut, setFrozenDisplay]);
 
   // Helper to process overlays in a single pass
   const renderTextWithOverlays = (text: string, forceTransform = false) => {

@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/VideoPlayer.css';
 
-const VIDEO_SRC = '/TheMundaneMovie.MOV'; // Place your video in public/TheMundaneMovie.MOV
-
 const FLICKER_SEQUENCE = [
   '#111', '#fff', '#222', '#fff', '#111', '#fff', '#eee', '#fff', '#fff'
 ];
@@ -78,13 +76,16 @@ const VideoPlayer: React.FC = () => {
       >
         you can dim the lights.
       </div>
-      <video
-        className="video-player-video"
-        src={VIDEO_SRC}
-        controls
-      >
-        Your browser does not support the video tag.
-      </video>
+      <div className="video-player-video" style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', width: '90vw', maxWidth: 1000, minWidth: 360, margin: '0 auto' }}>
+        <iframe
+          src="https://www.youtube.com/embed/GXa732Mshx4"
+          title="The Mundane Movie"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}
+        />
+      </div>
       <div
         className={`switch-container${!dimmed ? ' on' : ''}`}
         ref={switchRef}
