@@ -1,0 +1,104 @@
+/* VideoPlayer.css */
+
+.video-player-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.5s;
+}
+
+.video-player-message {
+  margin-bottom: 16px;
+  font-family: 'Fira Mono', monospace;
+  text-transform: lowercase;
+  font-size: 1.2rem;
+  letter-spacing: 0.01em;
+  color: #111;
+  text-align: center;
+  background: transparent;
+}
+
+.video-player-toggle {
+  margin-bottom: 24px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #000000;
+  color: #fff;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  font-family: 'Fira Mono', monospace;
+  text-transform: lowercase;
+  transition: background 0.3s, color 0.3s;
+}
+
+.video-player-toggle.lights-on {
+  background: #fff;
+  color: #111;
+}
+
+.video-player-video {
+  width: 90vw;
+  max-width: 700px;
+  background: #000;
+  border-radius: 12px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.315);
+}
+
+.switch-container {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 32px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.switch-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  position: relative;
+  z-index: 2;
+}
+
+.glow-effect {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 180px;
+  height: 180px;
+  background: radial-gradient(circle, rgba(255, 165, 0, 0.2) 0%, rgba(255, 165, 0, 0) 60%);
+  border-radius: 50%;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+.switch-container.on .glow-effect {
+  opacity: 1;
+}
+
+.click-zone {
+  position: absolute;
+  width: 100%;
+  height: 50%;
+  z-index: 3;
+  left: 0;
+  cursor: pointer;
+}
+
+.top-zone {
+  top: 0;
+}
+
+.bottom-zone {
+  bottom: 0;
+} 

@@ -1,10 +1,18 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/AboutSquare.css';
 
 // Helper to detect mobile
 function isMobile() {
   return typeof window !== 'undefined' && /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
+
+// Helper to detect orientation
+function isLandscape() {
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    return window.matchMedia('(orientation: landscape)').matches;
+  }
+  return false;
 }
 
 const TYPING_SPEED = isMobile() ? 18 : 7; // ms per character, slower on mobile
@@ -19,6 +27,11 @@ const LINK_CLASSES: { [key: string]: string } = {
   'tony toskalio': 'about-link-tony',
   'syπthesizer.': 'about-link-synth',
   'htl donaustadt': 'about-link-htl',
+  'social': 'about-link-social',
+  'drawing': 'about-link-drawing',
+  'the mundane': 'about-link-mundane',
+  'graphic and logo design': 'about-link-graphic',
+  'photography': 'about-link-photo',
 };
 
 const About: React.FC = () => {
@@ -30,11 +43,24 @@ const About: React.FC = () => {
   const [fadeOut, setFadeOut] = useState(false);
   const [animationDone, setAnimationDone] = useState(false);
   const [frozenDisplay, setFrozenDisplay] = useState<string | null>(null);
+  const [showLinksOnly, setShowLinksOnly] = useState(false); // NEW
   const animationFrame = useRef<number | null>(null);
   const navigate = useNavigate();
 
   // Store random rotations for overlays
   const overlayRotations = useRef<{ [key: string]: number }>({});
+
+  // Ref for animated text container
+  const animatedTextRef = useRef<HTMLDivElement>(null);
+  // Ref for the last character (for autoscroll)
+  const lastCharRef = useRef<HTMLSpanElement>(null);
+
+  // Auto-scroll to last character as text animates
+  useEffect(() => {
+    if (animatedTextRef.current && lastCharRef.current && !showLinksOnly && !fadeOut) {
+      lastCharRef.current.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
+    }
+  }, [displayed, showLinksOnly, fadeOut]);
 
   // Animation logic
   useEffect(() => {
@@ -79,6 +105,10 @@ const About: React.FC = () => {
   // Click handler for typewriter
   const handleClick = () => {
     if (!about) return;
+    if (isMobile()) {
+      setShowLinksOnly(v => !v); // Toggle links-only mode on mobile
+      return;
+    }
     if (!isSkipping && displayed.length < about.length) {
       // Skip to end
       setIsSkipping(true);
@@ -86,13 +116,24 @@ const About: React.FC = () => {
     } else if (isSkipping) {
       // Resume animation from where it would have been
       if (pausedAt !== null && startTime !== null) {
-        const elapsed = pausedAt - startTime;
+        // Instead of resuming from where it left off, calculate how much time has passed since startTime, including time spent paused
+        const now = performance.now();
+        const elapsed = now - startTime;
         const charsToShow = Math.floor(elapsed / TYPING_SPEED);
-        // Calculate new start time so animation resumes as if uninterrupted
-        setStartTime(performance.now() - charsToShow * TYPING_SPEED);
-        setIsSkipping(false);
-        setPausedAt(null);
-        setAnimationDone(false);
+        if (charsToShow >= about.length) {
+          // Animation is already done, just show the full text and do nothing else
+          setDisplayed(about);
+          setAnimationDone(true);
+          setIsSkipping(false);
+          setPausedAt(null);
+          setStartTime(null);
+        } else {
+          setDisplayed(about.slice(0, charsToShow));
+          setStartTime(startTime); // keep the original startTime
+          setIsSkipping(false);
+          setPausedAt(null);
+          setAnimationDone(false);
+        }
       }
     }
   };
@@ -130,6 +171,32 @@ const About: React.FC = () => {
       onClick: undefined,
       href: 'https://htl-donaustadt.at',
     },
+    // New links
+    {
+      word: 'social',
+      onClick: undefined,
+      href: '/socials', // open the new social slot page
+    },
+    {
+      word: 'drawing',
+      onClick: undefined,
+      href: '#',
+    },
+    {
+      word: 'the mundane',
+      onClick: undefined,
+      href: '/mundane', // open the new video page
+    },
+    {
+      word: 'graphic and logo design',
+      onClick: undefined,
+      href: '#',
+    },
+    {
+      word: 'photography',
+      onClick: undefined,
+      href: '#',
+    },
   ];
 
   // Helper to process overlays in a single pass
@@ -153,27 +220,45 @@ const About: React.FC = () => {
         // Push text before the match
         if (nextIdx > i) result.push(text.slice(i, nextIdx));
         // Overlay logic
-        const isLink = animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href);
-        const handleOverlayClick = (e: React.MouseEvent) => {
-          if (!isLink) return;
-          if (matchOverlay && matchOverlay.onClick) return matchOverlay.onClick(e);
-          if (matchOverlay && matchOverlay.href) {
-            e.preventDefault();
-            window.open(matchOverlay.href, '_blank', 'noopener');
-          }
-        };
-        // On mobile, always add a modifier class for transform
-        let className = isLink ? LINK_CLASSES[nextMatch] : '';
-        if (forceTransform && className) className += ' about-link-flip';
-        result.push(
-          <span
-            key={nextIdx + '-' + nextMatch}
-            className={className}
-            onClick={isLink ? handleOverlayClick : undefined}
-          >
-            {text.slice(nextIdx, nextIdx + nextMatch.length)}
-          </span>
-        );
+        if (nextMatch === 'social' && animationDone && !fadeOut) {
+          // Now just render the link as before
+          const isLink = true;
+          let className = LINK_CLASSES[nextMatch];
+          if (forceTransform && className) className += ' about-link-flip';
+          result.push(
+            <span
+              key={nextIdx + '-' + nextMatch}
+              className={className}
+              onClick={e => {
+                e.preventDefault();
+                window.open('/socials', '_blank', 'noopener');
+              }}
+            >
+              {text.slice(nextIdx, nextIdx + nextMatch.length)}
+            </span>
+          );
+        } else {
+          const isLink = animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href);
+          const handleOverlayClick = (e: React.MouseEvent) => {
+            if (!isLink) return;
+            if (matchOverlay && matchOverlay.onClick) return matchOverlay.onClick(e);
+            if (matchOverlay && matchOverlay.href) {
+              e.preventDefault();
+              window.open(matchOverlay.href, '_blank', 'noopener');
+            }
+          };
+          let className = isLink ? LINK_CLASSES[nextMatch] : '';
+          if (forceTransform && className) className += ' about-link-flip';
+          result.push(
+            <span
+              key={nextIdx + '-' + nextMatch}
+              className={className}
+              onClick={isLink ? handleOverlayClick : undefined}
+            >
+              {text.slice(nextIdx, nextIdx + nextMatch.length)}
+            </span>
+          );
+        }
         i = nextIdx + nextMatch.length;
       } else {
         // No more overlays, push the rest
@@ -189,20 +274,177 @@ const About: React.FC = () => {
   // On mobile, always apply the transform class to links
   const withOverlays = renderTextWithOverlays(textToDisplay, isMobile());
 
+  // Generate unique, substantially different random colors for links
+  const linkColors = useMemo(() => {
+    // Use a set of visually distinct colors
+    const palette = [
+      '#e53935', // red
+      '#8e24aa', // purple
+      '#3949ab', // blue
+      '#00897b', // teal
+      '#fbc02d', // yellow
+      '#43a047', // green
+      '#fb8c00', // orange
+      '#00bcd4', // cyan
+      '#d81b60', // pink
+      '#6d4c41', // brown
+    ];
+    // Shuffle palette and assign to overlays
+    const shuffled = [...palette].sort(() => Math.random() - 0.5);
+    return overlays.map((_, i) => shuffled[i % shuffled.length]);
+  }, [overlays.length]);
+
+  // Collect all overlay links for links-only mode
+  const allLinks = overlays.map((overlay, idx) => {
+    if (!LINK_CLASSES[overlay.word]) return null;
+    const isLink = animationDone && !fadeOut && (!!overlay.onClick || !!overlay.href);
+    // Responsive font size: larger in portrait, smaller in landscape
+    let fontSize = 'clamp(1.3rem, 6vw, 2.8rem)';
+    if (isMobile() && isLandscape()) fontSize = 'clamp(1.1rem, 4vw, 2.2rem)';
+    return (
+      <span
+        key={overlay.word}
+        className={LINK_CLASSES[overlay.word] + ' about-link-list'}
+        onClick={isLink ? (e => {
+          if (overlay.onClick) return overlay.onClick(e);
+          if (overlay.href) {
+            e.preventDefault();
+            window.open(overlay.href, '_blank', 'noopener');
+          }
+        }) : undefined}
+        style={{
+          display: 'block',
+          fontSize,
+          fontWeight: 700,
+          margin: 'min(2vw, 18px) 0',
+          textAlign: 'center',
+          transform: 'none',
+          color: linkColors[idx],
+          transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1), color 0.5s cubic-bezier(.77,0,.18,1)',
+          opacity: showLinksOnly ? 1 : 0,
+          pointerEvents: showLinksOnly ? 'auto' : 'none',
+          wordBreak: 'break-word',
+          whiteSpace: isMobile() && isLandscape() ? 'nowrap' : undefined,
+        }}
+      >
+        {overlay.word}
+      </span>
+    );
+  });
+
+  // Helper to render animated text with a span on the last character for autoscroll
+  const renderAnimatedText = (nodes: React.ReactNode) => {
+    if (typeof nodes === 'string') {
+      if (!nodes) return null;
+      return (
+        <>
+          {nodes.slice(0, -1)}
+          <span ref={lastCharRef}>{nodes.slice(-1)}</span>
+        </>
+      );
+    }
+    if (Array.isArray(nodes)) {
+      if (!nodes.length) return null;
+      const lastIdx = nodes.length - 1;
+      return nodes.map((n, i) =>
+        i === lastIdx ? <span ref={lastCharRef} key={i}>{n}</span> : n
+      );
+    }
+    return nodes;
+  };
+
   return (
     <div
       className="about-square-container"
       style={{
         opacity: fadeOut ? 0 : 1,
+        transition: 'opacity 0.6s cubic-bezier(.77,0,.18,1)',
+        overflow: 'hidden',
+        minHeight: '100vh',
+        minWidth: '100vw',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
       }}
     >
       <div
-        className="about-square-text"
+        className={
+          'about-square-text about-scroll-hide' +
+          (isMobile() && isLandscape() && showLinksOnly ? ' about-links-horizontal-scroll' : '')
+        }
         onClick={handleClick}
         title="Click to skip/resume animation"
-        style={isMobile() ? { maxHeight: '80vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' } : {}}
+        ref={animatedTextRef}
+        style={isMobile() ? {
+          maxHeight: '90vh',
+          maxWidth: '92vw',
+          overflowY: 'auto',
+          overflowX: isMobile() && isLandscape() && showLinksOnly ? 'auto' : 'hidden',
+          // In horizontal links-only mode, allow both scroll directions
+          ...(isMobile() && isLandscape() && showLinksOnly ? { overflowY: 'auto', overflowX: 'auto' } : {}),
+          cursor: 'pointer',
+          position: 'relative',
+          width: '100%',
+          display: 'flex',
+          flexDirection: isMobile() && isLandscape() && showLinksOnly ? 'row' : 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '4vw 3vw',
+          boxSizing: 'border-box',
+          borderRadius: 18,
+          background: 'rgba(255,255,255,0.98)',
+          gap: isMobile() && isLandscape() && showLinksOnly ? '2vw' : undefined,
+        } : {
+          maxHeight: '90vh',
+          maxWidth: '60vw',
+          overflowY: showLinksOnly ? 'hidden' : 'auto',
+          overflowX: 'hidden',
+          cursor: 'pointer',
+          position: 'relative',
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '3vw 2vw',
+          boxSizing: 'border-box',
+          borderRadius: 18,
+          background: 'rgba(255,255,255,0.98)',
+        }}
       >
-        {withOverlays}
+        <div
+          className="about-scroll-hide"
+          style={{
+            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1)',
+            opacity: showLinksOnly ? 0 : 1,
+            pointerEvents: showLinksOnly ? 'none' : 'auto',
+            transform: showLinksOnly ? 'translateY(-30px) scale(0.98)' : 'none',
+            position: showLinksOnly ? 'absolute' : 'static',
+            width: '100%',
+            height: '100%',
+            overflow: 'auto',
+          }}
+        >
+          {renderAnimatedText(withOverlays)}
+        </div>
+        <div
+          style={{
+            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1)',
+            opacity: showLinksOnly ? 1 : 0,
+            pointerEvents: showLinksOnly ? 'auto' : 'none',
+            transform: showLinksOnly ? 'none' : 'translateY(30px) scale(0.98)',
+            position: showLinksOnly ? 'static' : 'absolute',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+          }}
+        >
+          {allLinks}
+        </div>
       </div>
     </div>
   );
