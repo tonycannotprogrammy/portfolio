@@ -12,17 +12,18 @@ const VideoPlayer: React.FC = () => {
   const switchRef = useRef<HTMLDivElement>(null);
   const flickerTimeouts = useRef<number[]>([]);
 
-  // Flicker effect when turning lights ON
+  // Flicker effect when turning lights ON (simulate fluorescent tube: alternate black/white 5 times)
   useEffect(() => {
     if (!dimmed && flicker) {
-      FLICKER_SEQUENCE.forEach((color, i) => {
-        const t = window.setTimeout(() => setBg(color), i * 60);
+      const sequence = ['#fff', '#111', '#fff', '#111', '#fff', '#111', '#fff', '#111', '#fff']; // 5 white, 4 black
+      sequence.forEach((color, i) => {
+        const t = window.setTimeout(() => setBg(color), i * 70);
         flickerTimeouts.current.push(t);
       });
       const end = window.setTimeout(() => {
         setBg('#fff');
         setFlicker(false);
-      }, FLICKER_SEQUENCE.length * 60 + 40);
+      }, sequence.length * 70 + 40);
       flickerTimeouts.current.push(end);
       return () => {
         flickerTimeouts.current.forEach(clearTimeout);
@@ -61,12 +62,13 @@ const VideoPlayer: React.FC = () => {
     }
   };
 
-  // When dimmed, set bg to dark (seamless)
+  // When dimmed, set bg to dark instantly
   useEffect(() => {
-    if (dimmed) setBg('#111');
-    // If not dimmed and not flickering, ensure bg is white
-    if (!dimmed && !flicker) setBg('#fff');
-  }, [dimmed, flicker]);
+    if (dimmed) {
+      setBg('#111');
+    }
+    // Do not set to white here; let flicker handle it when undimming
+  }, [dimmed]);
 
   return (
     <div className="video-player-root">
