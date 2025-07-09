@@ -221,9 +221,12 @@ const About: React.FC = () => {
         if (nextIdx > i) result.push(text.slice(i, nextIdx));
         // Overlay logic
         const handleOverlayClick = (e: React.MouseEvent) => {
-          if (!(animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href))) return;
-          if (matchOverlay && matchOverlay.onClick) return matchOverlay.onClick(e);
-          if (matchOverlay && matchOverlay.href) {
+          if (
+            !matchOverlay ||
+            !(animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href))
+          ) return;
+          if (matchOverlay.onClick) return matchOverlay.onClick(e);
+          if (matchOverlay.href) {
             e.preventDefault();
             window.open(matchOverlay.href, '_blank', 'noopener');
           }
