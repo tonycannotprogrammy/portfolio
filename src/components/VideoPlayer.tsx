@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../styles/VideoPlayer.css';
 
-const FLICKER_SEQUENCE = [
-  '#111', '#fff', '#222', '#fff', '#111', '#fff', '#eee', '#fff', '#fff'
-];
-
 const VideoPlayer: React.FC = () => {
   const [dimmed, setDimmed] = useState(false);
   const [flicker, setFlicker] = useState(false);
