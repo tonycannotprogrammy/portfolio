@@ -34,7 +34,7 @@ const LINK_CLASSES = {
 };
 
 const OVERLAYS = [
-  { word: 'tony toskalio', onClick: (navigate: (path: string) => void, displayed: string, setFadeOut: React.Dispatch<React.SetStateAction<boolean>>, setFrozenDisplay: React.Dispatch<React.SetStateAction<string | null>>) => (e: React.MouseEvent) => { e.preventDefault(); setFrozenDisplay(displayed); setFadeOut(true); setTimeout(() => navigate('/'), 600); } },
+  { word: 'tony toskalio', onClick: (navigate: (path: string) => void, displayed: string, setFrozenDisplay: React.Dispatch<React.SetStateAction<string | null>>) => (e: React.MouseEvent) => { e.preventDefault(); setFrozenDisplay(displayed); setTimeout(() => navigate('/'), 600); } },
   { word: 'syπthesizer.', href: 'https://synthesizer.cargo.site' },
   { word: 'htl donaustadt', href: 'https://htl-donaustadt.at' },
   { word: 'social', href: '/socials' },
@@ -48,7 +48,6 @@ const About: React.FC = () => {
   const [displayed, setDisplayed] = React.useState<string>('');
   const [isSkipping, setIsSkipping] = React.useState<boolean>(false);
   const [startTime, setStartTime] = React.useState<number | null>(null);
-  const [fadeOut, setFadeOut] = React.useState<boolean>(false);
   const [frozenDisplay, setFrozenDisplay] = React.useState<string | null>(null);
   const [showLinksList, setShowLinksList] = React.useState<boolean>(false);
   const navigate = useNavigate();
@@ -59,7 +58,6 @@ const About: React.FC = () => {
     setIsSkipping(false);
     setStartTime(performance.now());
     setFrozenDisplay(null);
-    setFadeOut(false);
     document.title = 'about tony.';
   }, []);
 
@@ -119,7 +117,7 @@ const About: React.FC = () => {
             <span
               key={nextIdx + '-' + nextMatch}
               className={className}
-              onClick={matchOverlay.onClick(navigate, displayed, setFadeOut, setFrozenDisplay)}
+              onClick={matchOverlay.onClick(navigate, displayed, setFrozenDisplay)}
               style={{ textDecoration: 'none', cursor: 'pointer' }}
             >
               {content}
@@ -189,7 +187,7 @@ const About: React.FC = () => {
                 <span
                   key={overlay.word}
                   className={className}
-                  onClick={overlay.onClick(navigate, displayed, setFadeOut, setFrozenDisplay)}
+                  onClick={overlay.onClick(navigate, displayed, setFrozenDisplay)}
                   style={linkStyle}
                 >
                   {overlay.word}
@@ -238,7 +236,7 @@ const About: React.FC = () => {
               <span
                 key={overlay.word}
                 className={className}
-                onClick={overlay.onClick(navigate, displayed, setFadeOut, setFrozenDisplay)}
+                onClick={overlay.onClick(navigate, displayed, setFrozenDisplay)}
                 style={linkStyle}
               >
                 {overlay.word}
