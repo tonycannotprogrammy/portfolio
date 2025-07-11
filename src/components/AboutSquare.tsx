@@ -22,8 +22,7 @@ this passion led me to work on a variety of creative projects where i’ve colla
 another highlight is the mundane, a short film i directed that was exhibited during the open house event at htl donaustadt. i tend to keep my creative scope broad, experimenting across disciplines — a mindset shaped deeply by my father, whose work ethic and hands-on skill have always inspired me.
 currently, i'm focused on graphic and logo design, typography, photography, and vibe coding visual art installations. i also dabble in blender from time to time. in the near future, i plan to dive deeper into video production and hardware design, from pcb layouts to cad modeling and 3d printing.`;
 
-// Define unique classes for each link
-const LINK_CLASSES: { [key: string]: string } = {
+const LINK_CLASSES = {
   'tony toskalio': 'about-link-tony',
   'syπthesizer.': 'about-link-synth',
   'htl donaustadt': 'about-link-htl',
@@ -34,218 +33,103 @@ const LINK_CLASSES: { [key: string]: string } = {
   'photography': 'about-link-photo',
 };
 
+const OVERLAYS = [
+  { word: 'tony toskalio', onClick: (navigate: (path: string) => void, displayed: string, setFadeOut: React.Dispatch<React.SetStateAction<boolean>>, setFrozenDisplay: React.Dispatch<React.SetStateAction<string | null>>) => (e: React.MouseEvent) => { e.preventDefault(); setFrozenDisplay(displayed); setFadeOut(true); setTimeout(() => navigate('/'), 600); } },
+  { word: 'syπthesizer.', href: 'https://synthesizer.cargo.site' },
+  { word: 'htl donaustadt', href: 'https://htl-donaustadt.at' },
+  { word: 'social', href: '/socials' },
+  { word: 'drawing', href: '#' },
+  { word: 'the mundane', href: '/mundane' },
+  { word: 'graphic and logo design', href: '#' },
+  { word: 'photography', href: '#' },
+];
+
 const About: React.FC = () => {
-  const [about] = useState(ABOUT_TEXT);
-  const [displayed, setDisplayed] = useState('');
-  const [isSkipping, setIsSkipping] = useState(false);
-  const [startTime, setStartTime] = useState<number | null>(null);
-  const [pausedAt, setPausedAt] = useState<number | null>(null);
-  const [fadeOut, setFadeOut] = useState(false);
-  const [animationDone, setAnimationDone] = useState(false);
-  const [frozenDisplay, setFrozenDisplay] = useState<string | null>(null);
-  const [showLinksOnly, setShowLinksOnly] = useState(false); // NEW
-  const animationFrame = useRef<number | null>(null);
+  const [displayed, setDisplayed] = React.useState<string>('');
+  const [isSkipping, setIsSkipping] = React.useState<boolean>(false);
+  const [startTime, setStartTime] = React.useState<number | null>(null);
+  const [fadeOut, setFadeOut] = React.useState<boolean>(false);
+  const [frozenDisplay, setFrozenDisplay] = React.useState<string | null>(null);
+  const [showLinksList, setShowLinksList] = React.useState<boolean>(false);
   const navigate = useNavigate();
+  const lastCharRef = React.useRef<HTMLSpanElement>(null);
 
-  // Store random rotations for overlays
-  const overlayRotations = useRef<{ [key: string]: number }>({});
-
-  // Ref for animated text container
-  const animatedTextRef = useRef<HTMLDivElement>(null);
-  // Ref for the last character (for autoscroll)
-  const lastCharRef = useRef<HTMLSpanElement>(null);
-
-  // Auto-scroll to last character as text animates
-  useEffect(() => {
-    if (animatedTextRef.current && lastCharRef.current && !showLinksOnly && !fadeOut) {
-      lastCharRef.current.scrollIntoView({ behavior: 'auto', block: 'nearest', inline: 'nearest' });
-    }
-  }, [displayed, showLinksOnly, fadeOut]);
-
-  // Animation logic
-  useEffect(() => {
+  React.useEffect(() => {
     setDisplayed('');
     setIsSkipping(false);
     setStartTime(performance.now());
-    setPausedAt(null);
-    setAnimationDone(false);
     setFrozenDisplay(null);
-    overlayRotations.current = {}; // Reset rotations on new text
-    document.title = "about tony.";
-  }, [about]);
+    setFadeOut(false);
+    document.title = 'about tony.';
+  }, []);
 
-  useEffect(() => {
-    if (!about) return;
+  React.useEffect(() => {
     if (isSkipping) {
-      setDisplayed(about);
-      setAnimationDone(true);
-      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
+      setDisplayed(ABOUT_TEXT);
       return;
     }
     let raf: number;
     const animate = (now: number) => {
-      let elapsed = (pausedAt !== null ? pausedAt : now) - (startTime ?? now);
-      let charsToShow = Math.min(about.length, Math.floor(elapsed / TYPING_SPEED));
-      setDisplayed(about.slice(0, charsToShow));
-      if (charsToShow < about.length) {
-        raf = requestAnimationFrame(animate);
-        animationFrame.current = raf;
-      } else {
-        setAnimationDone(true);
-      }
+      let charsToShow = Math.min(ABOUT_TEXT.length, Math.floor((now - (startTime ?? now)) / TYPING_SPEED));
+      setDisplayed(ABOUT_TEXT.slice(0, charsToShow));
+      if (charsToShow < ABOUT_TEXT.length) raf = requestAnimationFrame(animate);
     };
     raf = requestAnimationFrame(animate);
-    animationFrame.current = raf;
-    return () => {
-      if (animationFrame.current) cancelAnimationFrame(animationFrame.current);
-    };
-    // eslint-disable-next-line
-  }, [about, isSkipping, startTime, pausedAt]);
+    return () => { if (raf) cancelAnimationFrame(raf); };
+  }, [isSkipping, startTime]);
 
-  // Click handler for typewriter
-  const handleClick = () => {
-    if (!about) return;
-    if (isMobile()) {
-      setShowLinksOnly(v => !v); // Toggle links-only mode on mobile
-      return;
-    }
-    if (!isSkipping && displayed.length < about.length) {
-      // Skip to end
+  // On click: if animating, skip; if done, toggle links/text (mobile only)
+  const handleTextClick = () => {
+    if (!isSkipping && displayed.length < ABOUT_TEXT.length) {
       setIsSkipping(true);
-      setPausedAt(performance.now());
-    } else if (isSkipping) {
-      // Resume animation from where it would have been
-      if (pausedAt !== null && startTime !== null) {
-        // Instead of resuming from where it left off, calculate how much time has passed since startTime, including time spent paused
-        const now = performance.now();
-        const elapsed = now - startTime;
-        const charsToShow = Math.floor(elapsed / TYPING_SPEED);
-        if (charsToShow >= about.length) {
-          // Animation is already done, just show the full text and do nothing else
-          setDisplayed(about);
-          setAnimationDone(true);
-          setIsSkipping(false);
-          setPausedAt(null);
-          setStartTime(null);
-        } else {
-          setDisplayed(about.slice(0, charsToShow));
-          setStartTime(startTime); // keep the original startTime
-          setIsSkipping(false);
-          setPausedAt(null);
-          setAnimationDone(false);
-        }
-      }
+    } else if (isMobile()) {
+      // Only toggle links list on mobile
+      setShowLinksList(l => !l);
     }
   };
 
-  // Overlay configuration (moved below handleNameClick)
-  type OverlayConfig = {
-    word: string;
-    onClick?: (e: React.MouseEvent) => void;
-    href?: string;
-  };
-  const overlays: OverlayConfig[] = useMemo(() => {
-    const handleNameClick = (e: React.MouseEvent) => {
-      if (!animationDone) return;
-      e.preventDefault();
-      setFrozenDisplay(displayed); // Freeze the current text
-      setFadeOut(true);
-      setTimeout(() => {
-        navigate('/');
-      }, 600); // Match fade duration
-    };
-    return [
-      {
-        word: 'tony toskalio',
-        onClick: handleNameClick,
-        href: undefined,
-      },
-      {
-        word: 'syπthesizer.',
-        onClick: undefined,
-        href: 'https://synthesizer.cargo.site',
-      },
-      {
-        word: 'htl donaustadt',
-        onClick: undefined,
-        href: 'https://htl-donaustadt.at',
-      },
-      // New links
-      {
-        word: 'social',
-        onClick: undefined,
-        href: '/socials', // open the new social slot page
-      },
-      {
-        word: 'drawing',
-        onClick: undefined,
-        href: '#',
-      },
-      {
-        word: 'the mundane',
-        onClick: undefined,
-        href: '/mundane', // open the new video page
-      },
-      {
-        word: 'graphic and logo design',
-        onClick: undefined,
-        href: '#',
-      },
-      {
-        word: 'photography',
-        onClick: undefined,
-        href: '#',
-      },
-    ];
-  }, [animationDone, displayed, navigate, setFadeOut, setFrozenDisplay]);
-
-  // Helper to process overlays in a single pass
-  const renderTextWithOverlays = (text: string, forceTransform = false) => {
-    let result: React.ReactNode[] = [];
-    let i = 0;
+  const renderTextWithOverlays = (text: string) => {
+    let result: React.ReactNode[] = [], i = 0;
     while (i < text.length) {
-      // Find the next overlay match
-      let nextMatch: string | null = null;
-      let nextIdx = text.length;
-      let matchOverlay: OverlayConfig | null = null;
-      for (const overlay of overlays) {
+      let nextMatch: string | null = null, nextIdx = text.length, matchOverlay: any = null;
+      for (const overlay of OVERLAYS) {
         const idx = text.toLowerCase().indexOf(overlay.word.toLowerCase(), i);
-        if (idx !== -1 && idx < nextIdx) {
-          nextIdx = idx;
-          nextMatch = overlay.word;
-          matchOverlay = overlay;
-        }
+        if (idx !== -1 && idx < nextIdx) { nextIdx = idx; nextMatch = overlay.word; matchOverlay = overlay; }
       }
       if (nextMatch && matchOverlay) {
-        // Push text before the match
         if (nextIdx > i) result.push(text.slice(i, nextIdx));
-        // Overlay logic
-        const handleOverlayClick = (e: React.MouseEvent) => {
-          if (
-            !matchOverlay ||
-            !(animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href))
-          ) return;
-          if (matchOverlay.onClick) return matchOverlay.onClick(e);
-          if (matchOverlay.href) {
-            e.preventDefault();
-            window.open(matchOverlay.href, '_blank', 'noopener');
-          }
-        };
-        // On mobile, always add a modifier class for transform
-        let className = (animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href)) ? LINK_CLASSES[nextMatch] : '';
-        if (forceTransform && className) className += ' about-link-flip';
-        result.push(
-          <span
-            key={nextIdx + '-' + nextMatch}
-            className={className}
-            onClick={(animationDone && !fadeOut && (!!matchOverlay.onClick || !!matchOverlay.href)) ? handleOverlayClick : undefined}
-          >
-            {text.slice(nextIdx, nextIdx + nextMatch.length)}
-          </span>
-        );
+        let className = nextMatch in LINK_CLASSES ? LINK_CLASSES[nextMatch as keyof typeof LINK_CLASSES] : '';
+        const content = text.slice(nextIdx, nextIdx + nextMatch.length);
+        if (matchOverlay.href) {
+          result.push(
+            <a
+              key={nextIdx + '-' + nextMatch}
+              className={className}
+              href={matchOverlay.href}
+              target={matchOverlay.href.startsWith('http') ? '_blank' : undefined}
+              rel={matchOverlay.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+              style={{ textDecoration: 'none', cursor: 'pointer' }}
+              onClick={matchOverlay.href.startsWith('/') ? (e) => { e.preventDefault(); navigate(matchOverlay.href); } : undefined}
+            >
+              {content}
+            </a>
+          );
+        } else if (matchOverlay.onClick) {
+          result.push(
+            <span
+              key={nextIdx + '-' + nextMatch}
+              className={className}
+              onClick={matchOverlay.onClick(navigate, displayed, setFadeOut, setFrozenDisplay)}
+              style={{ textDecoration: 'none', cursor: 'pointer' }}
+            >
+              {content}
+            </span>
+          );
+        } else {
+          result.push(content);
+        }
         i = nextIdx + nextMatch.length;
       } else {
-        // No more overlays, push the rest
         result.push(text.slice(i));
         break;
       }
@@ -253,230 +137,129 @@ const About: React.FC = () => {
     return result;
   };
 
-  // Compose overlays for all words in a single pass
   const textToDisplay = frozenDisplay !== null ? frozenDisplay : displayed;
-  // On mobile, always apply the transform class to links
-  const withOverlays = renderTextWithOverlays(textToDisplay, isMobile());
 
-  // Generate unique, substantially different random colors for links
-  const linkColors = useMemo(() => {
-    // Use a set of visually distinct colors
-    const palette = [
-      '#e53935', // red
-      '#8e24aa', // purple
-      '#3949ab', // blue
-      '#00897b', // teal
-      '#fbc02d', // yellow
-      '#43a047', // green
-      '#fb8c00', // orange
-      '#00bcd4', // cyan
-      '#d81b60', // pink
-      '#6d4c41', // brown
-    ];
-    // Shuffle palette and assign to overlays
-    const shuffled = [...palette].sort(() => Math.random() - 0.5);
-    return overlays.map((_, i) => shuffled[i % shuffled.length]);
-  }, [overlays]);
-
-  // Collect all overlay links for links-only mode
-  const allLinks = overlays.map((overlay, idx) => {
-    if (!LINK_CLASSES[overlay.word]) return null;
-    let fontSize = 'clamp(1.3rem, 6vw, 2.8rem)';
-    if (isMobile() && isLandscape()) fontSize = 'clamp(1.1rem, 4vw, 2.2rem)';
-    // Internal links: use navigate, external: use <a href target="_blank">
-    if (overlay.href && overlay.href.startsWith('/')) {
+  // Render all overlays as a vertical list of links
+  const renderLinksList = () => {
+    const isHorizontalMobile = isMobile() && isLandscape();
+    
+    if (isHorizontalMobile) {
+      // Horizontal mobile layout: wrapped rows of links
       return (
-        <span
-          key={overlay.word}
-          className={LINK_CLASSES[overlay.word] + ' about-link-list'}
-          onClick={animationDone && !fadeOut ? () => navigate(overlay.href!) : undefined}
-          style={{
-            display: 'block',
-            fontSize,
-            fontWeight: 700,
-            margin: 'min(2vw, 18px) 0',
-            textAlign: 'center',
-            transform: 'none',
-            color: linkColors[idx],
-            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1), color 0.5s cubic-bezier(.77,0,.18,1)',
-            opacity: showLinksOnly ? 1 : 0,
-            pointerEvents: showLinksOnly ? 'auto' : 'none',
-            wordBreak: 'break-word',
-            whiteSpace: isMobile() && isLandscape() ? 'nowrap' : undefined,
-            cursor: animationDone && !fadeOut ? 'pointer' : 'default',
-          }}
-        >
-          {overlay.word}
-        </span>
-      );
-    } else if (overlay.href) {
-      return (
-        <a
-          key={overlay.word}
-          className={LINK_CLASSES[overlay.word] + ' about-link-list'}
-          href={overlay.href}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            display: 'block',
-            fontSize,
-            fontWeight: 700,
-            margin: 'min(2vw, 18px) 0',
-            textAlign: 'center',
-            transform: 'none',
-            color: linkColors[idx],
-            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1), color 0.5s cubic-bezier(.77,0,.18,1)',
-            opacity: showLinksOnly ? 1 : 0,
-            pointerEvents: showLinksOnly ? 'auto' : 'none',
-            wordBreak: 'break-word',
-            whiteSpace: isMobile() && isLandscape() ? 'nowrap' : undefined,
-            cursor: animationDone && !fadeOut ? 'pointer' : 'default',
-          }}
-        >
-          {overlay.word}
-        </a>
-      );
-    } else {
-      return (
-        <span
-          key={overlay.word}
-          className={LINK_CLASSES[overlay.word] + ' about-link-list'}
-          onClick={animationDone && !fadeOut && overlay.onClick ? overlay.onClick : undefined}
-          style={{
-            display: 'block',
-            fontSize,
-            fontWeight: 700,
-            margin: 'min(2vw, 18px) 0',
-            textAlign: 'center',
-            transform: 'none',
-            color: linkColors[idx],
-            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1), color 0.5s cubic-bezier(.77,0,.18,1)',
-            opacity: showLinksOnly ? 1 : 0,
-            pointerEvents: showLinksOnly ? 'auto' : 'none',
-            wordBreak: 'break-word',
-            whiteSpace: isMobile() && isLandscape() ? 'nowrap' : undefined,
-            cursor: animationDone && !fadeOut ? 'pointer' : 'default',
-          }}
-        >
-          {overlay.word}
-        </span>
+        <div style={{ 
+          width: '100%', 
+          display: 'flex', 
+          flexDirection: 'row', 
+          flexWrap: 'wrap',
+          alignItems: 'center', 
+          justifyContent: 'space-between',
+          gap: '1vw',
+          padding: '1vw 0',
+        }}>
+          {OVERLAYS.filter(o => o.href || o.onClick).map((overlay, idx) => {
+            const className = overlay.word in LINK_CLASSES ? LINK_CLASSES[overlay.word as keyof typeof LINK_CLASSES] : '';
+            const linkStyle = {
+              textDecoration: 'none',
+              cursor: 'pointer',
+              display: 'inline-block',
+              fontWeight: 700,
+              fontSize: 'clamp(1.1rem, 4vw, 2.2rem)', // responsive font size for horizontal
+              lineHeight: 1.2,
+              margin: 0,
+              padding: '0.5vw 1vw',
+              whiteSpace: 'nowrap',
+              flex: '0 1 auto',
+            };
+            if (overlay.href) {
+              return (
+                <a
+                  key={overlay.word}
+                  className={className}
+                  href={overlay.href}
+                  target={overlay.href.startsWith('http') ? '_blank' : undefined}
+                  rel={overlay.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  style={linkStyle}
+                  onClick={overlay.href.startsWith('/') ? (e) => { e.preventDefault(); navigate(overlay.href); } : undefined}
+                >
+                  {overlay.word}
+                </a>
+              );
+            } else if (overlay.onClick) {
+              return (
+                <span
+                  key={overlay.word}
+                  className={className}
+                  onClick={overlay.onClick(navigate, displayed, setFadeOut, setFrozenDisplay)}
+                  style={linkStyle}
+                >
+                  {overlay.word}
+                </span>
+              );
+            }
+            return null;
+          })}
+        </div>
       );
     }
-  });
-
-  // Helper to render animated text with a span on the last character for autoscroll
-  const renderAnimatedText = (nodes: React.ReactNode) => {
-    if (typeof nodes === 'string') {
-      if (!nodes) return null;
-      return (
-        <>
-          {nodes.slice(0, -1)}
-          <span ref={lastCharRef}>{nodes.slice(-1)}</span>
-        </>
-      );
-    }
-    if (Array.isArray(nodes)) {
-      if (!nodes.length) return null;
-      const lastIdx = nodes.length - 1;
-      return nodes.map((n, i) =>
-        i === lastIdx ? <span ref={lastCharRef} key={i}>{n}</span> : n
-      );
-    }
-    return nodes;
+    
+    // Default vertical layout
+    return (
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 0 }}>
+        {OVERLAYS.filter(o => o.href || o.onClick).map((overlay, idx) => {
+          const className = overlay.word in LINK_CLASSES ? LINK_CLASSES[overlay.word as keyof typeof LINK_CLASSES] : '';
+          const linkStyle = {
+            textDecoration: 'none',
+            cursor: 'pointer',
+            display: 'block',
+            fontWeight: 700,
+            fontSize: '1.7rem', // match about text size
+            lineHeight: 1.3,
+            margin: '0 0 0.7em 0',
+            textAlign: 'justify' as const,
+            width: '100%',
+            wordBreak: 'break-word' as const,
+          };
+          if (overlay.href) {
+            return (
+              <a
+                key={overlay.word}
+                className={className}
+                href={overlay.href}
+                target={overlay.href.startsWith('http') ? '_blank' : undefined}
+                rel={overlay.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                style={linkStyle}
+                onClick={overlay.href.startsWith('/') ? (e) => { e.preventDefault(); navigate(overlay.href); } : undefined}
+              >
+                {overlay.word}
+              </a>
+            );
+          } else if (overlay.onClick) {
+            return (
+              <span
+                key={overlay.word}
+                className={className}
+                onClick={overlay.onClick(navigate, displayed, setFadeOut, setFrozenDisplay)}
+                style={linkStyle}
+              >
+                {overlay.word}
+              </span>
+            );
+          }
+          return null;
+        })}
+      </div>
+    );
   };
 
   return (
-    <div
-      className="about-square-container"
-      style={{
-        opacity: fadeOut ? 0 : 1,
-        transition: 'opacity 0.6s cubic-bezier(.77,0,.18,1)',
-        overflow: 'hidden',
-        minHeight: '100vh',
-        minWidth: '100vw',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        className={
-          'about-square-text about-scroll-hide' +
-          (isMobile() && isLandscape() && showLinksOnly ? ' about-links-horizontal-scroll' : '')
-        }
-        onClick={handleClick}
-        title="Click to skip/resume animation"
-        ref={animatedTextRef}
-        style={isMobile() ? {
-          maxHeight: '90vh',
-          maxWidth: '92vw',
-          overflowY: 'auto',
-          overflowX: isMobile() && isLandscape() && showLinksOnly ? 'auto' : 'hidden',
-          // In horizontal links-only mode, allow both scroll directions
-          ...(isMobile() && isLandscape() && showLinksOnly ? { overflowY: 'auto', overflowX: 'auto' } : {}),
-          cursor: 'pointer',
-          position: 'relative',
-          width: '100%',
-          display: 'flex',
-          flexDirection: isMobile() && isLandscape() && showLinksOnly ? 'row' : 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '4vw 3vw',
-          boxSizing: 'border-box',
-          borderRadius: 18,
-          background: 'rgba(255,255,255,0.98)',
-          gap: isMobile() && isLandscape() && showLinksOnly ? '2vw' : undefined,
-        } : {
-          maxHeight: '90vh',
-          maxWidth: '60vw',
-          overflowY: showLinksOnly ? 'hidden' : 'auto',
-          overflowX: 'hidden',
-          cursor: 'pointer',
-          position: 'relative',
-          width: '100%',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '3vw 2vw',
-          boxSizing: 'border-box',
-          borderRadius: 18,
-          background: 'rgba(255,255,255,0.98)',
-        }}
-      >
-        <div
-          className="about-scroll-hide"
-          style={{
-            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1)',
-            opacity: showLinksOnly ? 0 : 1,
-            pointerEvents: showLinksOnly ? 'none' : 'auto',
-            transform: showLinksOnly ? 'translateY(-30px) scale(0.98)' : 'none',
-            position: showLinksOnly ? 'absolute' : 'static',
-            width: '100%',
-            height: '100%',
-            overflow: 'auto',
-          }}
-        >
-          {renderAnimatedText(withOverlays)}
-        </div>
-        <div
-          style={{
-            transition: 'opacity 0.5s cubic-bezier(.77,0,.18,1), transform 0.5s cubic-bezier(.77,0,.18,1)',
-            opacity: showLinksOnly ? 1 : 0,
-            pointerEvents: showLinksOnly ? 'auto' : 'none',
-            transform: showLinksOnly ? 'none' : 'translateY(30px) scale(0.98)',
-            position: showLinksOnly ? 'static' : 'absolute',
-            width: '100%',
-            height: '100%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            overflow: 'hidden',
-          }}
-        >
-          {allLinks}
-        </div>
+    <div className="about-square-container" style={{ minHeight: '100vh', minWidth: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="about-square-text" style={{ width: '100%', background: 'rgba(255,255,255,0.98)', borderRadius: 18, padding: '4vw 3vw', cursor: 'pointer' }} onClick={handleTextClick}>
+        {showLinksList ? renderLinksList() : (
+          <>
+            {renderTextWithOverlays(textToDisplay)}
+            <span ref={lastCharRef} />
+          </>
+        )}
       </div>
     </div>
   );

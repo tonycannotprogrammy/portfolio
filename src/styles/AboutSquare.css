@@ -15,11 +15,11 @@
   font-weight: bold;
   text-align: justify;
   line-height: 1.3;
-  max-width: 900px;
+  max-width: 1100px;
   white-space: pre-wrap;
   word-break: break-word;
   cursor: pointer;
-  padding: 2.5vw 2vw 3vw 2vw;
+  padding: 4vw 3vw 5vw 3vw;
   box-sizing: border-box;
   background: none;
   border-radius: 0;
@@ -66,6 +66,7 @@
   transition: none;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
 }
 .about-link-tony:hover, .about-link-tony.about-link-flip {
   transform: rotate(180deg) scaleX(-1);
@@ -79,6 +80,7 @@
   transition: none;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
 }
 .about-link-synth:hover, .about-link-synth.about-link-flip {
   transform: rotate(180deg) scaleX(-1);
@@ -92,6 +94,7 @@
   transition: none;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
 }
 .about-link-htl:hover, .about-link-htl.about-link-flip {
   transform: rotate(180deg) scaleX(-1);
@@ -105,6 +108,7 @@
   transition: none;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
 }
 .about-link-drawing:hover, .about-link-drawing.about-link-flip {
   transform: rotate(180deg) scaleX(-1);
@@ -118,6 +122,7 @@
   transition: none;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
 }
 .about-link-mundane:hover, .about-link-mundane.about-link-flip {
   transform: rotate(180deg) scaleX(-1);
@@ -131,6 +136,7 @@
   transition: none;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
 }
 .about-link-graphic:hover, .about-link-graphic.about-link-flip {
   transform: rotate(180deg) scaleX(-1);
@@ -144,6 +150,7 @@
   transition: none;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
 }
 .about-link-photo:hover, .about-link-photo.about-link-flip {
   transform: rotate(180deg) scaleX(-1);
@@ -157,6 +164,7 @@
   transition: none;
   cursor: pointer;
   display: inline-block;
+  text-decoration: none;
 }
 .about-link-social:hover, .about-link-social.about-link-flip {
   transform: rotate(180deg) scaleX(-1);
@@ -165,6 +173,10 @@
 
 .about-link-flip {
   transform: rotate(180deg) scaleX(-1) !important;
+}
+
+.about-link-list {
+  text-decoration: none !important;
 }
 
 /* Responsive font size for about-square-text */

@@ -88,7 +88,7 @@ const Card: React.FC = () => {
   return (
     <>
       <div className="rotate-message">
-        please rotate your phone horizontally.
+        please rotate your device horizontally.
       </div>
       <div
         className="card-container"

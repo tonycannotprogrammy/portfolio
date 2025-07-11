@@ -1,77 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/VideoPlayer.css';
 
 const VideoPlayer: React.FC = () => {
   const [dimmed, setDimmed] = useState(false);
-  const [flicker, setFlicker] = useState(false);
-  const [bg, setBg] = useState('#fff');
-  const switchRef = useRef<HTMLDivElement>(null);
-  const flickerTimeouts = useRef<number[]>([]);
 
-  // Flicker effect when turning lights ON (simulate fluorescent tube: alternate black/white 5 times)
   useEffect(() => {
-    if (!dimmed && flicker) {
-      const sequence = ['#fff', '#111', '#fff', '#111', '#fff', '#111', '#fff', '#111', '#fff']; // 5 white, 4 black
-      sequence.forEach((color, i) => {
-        const t = window.setTimeout(() => setBg(color), i * 70);
-        flickerTimeouts.current.push(t);
-      });
-      const end = window.setTimeout(() => {
-        setBg('#fff');
-        setFlicker(false);
-      }, sequence.length * 70 + 40);
-      flickerTimeouts.current.push(end);
-      return () => {
-        flickerTimeouts.current.forEach(clearTimeout);
-        flickerTimeouts.current = [];
-      };
-    }
-  }, [flicker, dimmed]);
-
-  // Set body background color to match dimming or flicker
-  useEffect(() => {
-    document.body.style.transition = 'background 0.7s cubic-bezier(.77,0,.18,1)';
-    document.body.style.backgroundColor = bg;
+    document.body.style.backgroundColor = dimmed ? '#111' : '#fff';
     return () => {
       document.body.style.backgroundColor = '';
-      document.body.style.transition = '';
     };
-  }, [bg]);
-
-  // Switch image sources (replace with your own if needed)
-  const switchOff = '/switch-off.png'; // Place in public/
-  const switchOn = '/switch-on.png'; // Place in public/
-
-  // Handlers for top/bottom click zones (reversed logic)
-  const handleTopClick = (e: React.MouseEvent) => {
-    if (dimmed) {
-      setFlicker(true);
-      setDimmed(false); // Turn lights ON (with flicker)
-      e.stopPropagation();
-    }
-  };
-  const handleBottomClick = (e: React.MouseEvent) => {
-    if (!dimmed) {
-      setDimmed(true); // Turn lights OFF
-      setBg('#111');
-      e.stopPropagation();
-    }
-  };
-
-  // When dimmed, set bg to dark instantly
-  useEffect(() => {
-    if (dimmed) {
-      setBg('#111');
-    }
-    // Do not set to white here; let flicker handle it when undimming
   }, [dimmed]);
+
+  const switchOff = '/switch-off.png';
+  const switchOn = '/switch-on.png';
 
   return (
     <div className="video-player-root">
-      <div
-        className="video-player-message"
-        style={{ fontSize: '1.05rem' }}
-      >
+      <div className="video-player-message" style={{ fontSize: '1.05rem' }}>
         you can dim the lights.
       </div>
       <div className="video-player-video" style={{ position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', width: '90vw', maxWidth: 1000, minWidth: 360, margin: '0 auto' }}>
@@ -86,17 +31,14 @@ const VideoPlayer: React.FC = () => {
       </div>
       <div
         className={`switch-container${!dimmed ? ' on' : ''}`}
-        ref={switchRef}
-        style={{ margin: '32px 0 0 0' }}
+        style={{ margin: '32px 0 0 0', cursor: 'pointer' }}
+        onClick={() => setDimmed(d => !d)}
       >
         <img
           src={dimmed ? switchOff : switchOn}
           alt="Switch"
           className="switch-image"
         />
-        <div className="glow-effect" />
-        <div className="click-zone top-zone" onClick={handleTopClick} />
-        <div className="click-zone bottom-zone" onClick={handleBottomClick} />
       </div>
     </div>
   );
