@@ -140,16 +140,6 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
-function useIsMobile() {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 812);
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth <= 812);
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-  return isMobile;
-}
-
 const App: React.FC = () => {
   return (
     <Router>
