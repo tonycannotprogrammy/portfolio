@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, createContext } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Card from "./components/Card";
 import About from "./components/AboutSquare";
@@ -6,12 +6,17 @@ import VideoPlayer from "./components/VideoPlayer";
 import SocialSlotPage from "./components/SocialSlotPage";
 import "./styles/Card.css";
 
+// Erstelle einen Kontext für den Cursor-Status
+export const CursorContext = createContext<{ showCursor: boolean; setShowCursor: React.Dispatch<React.SetStateAction<boolean>> }>(
+  { showCursor: true, setShowCursor: () => {} }
+);
+
 // Hide the default cursor for the whole app
 const appCursorStyle: React.CSSProperties = {
   cursor: "none",
 };
 
-const CustomCursor: React.FC = () => {
+const CustomCursor: React.FC<{ visible: boolean }> = ({ visible }) => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -19,6 +24,8 @@ const CustomCursor: React.FC = () => {
     window.addEventListener("mousemove", move);
     return () => window.removeEventListener("mousemove", move);
   }, []);
+
+  if (!visible) return null;
 
   return (
     <div
@@ -44,9 +51,14 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
   const scrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const [showCursor, setShowCursor] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const checkMobile = () => setShowCursor(window.innerWidth > 812);
+    const checkMobile = () => {
+      const isMobileDevice = window.innerWidth <= 812;
+      setIsMobile(isMobileDevice);
+      setShowCursor(!isMobileDevice);
+    };
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -131,12 +143,14 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   return (
-    <div style={appCursorStyle}>
-      {showCursor && <CustomCursor />}
-      <div className="scroll-container" ref={scrollRef}>
-        {children}
+    <CursorContext.Provider value={{ showCursor, setShowCursor }}>
+      <div style={appCursorStyle}>
+        {!isMobile && <CustomCursor visible={showCursor} />}
+        <div className="scroll-container" ref={scrollRef}>
+          {children}
+        </div>
       </div>
-    </div>
+    </CursorContext.Provider>
   );
 };
 

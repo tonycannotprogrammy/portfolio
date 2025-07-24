@@ -1,62 +1,47 @@
 /* VideoPlayer.css */
 
 .video-player-root {
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  transition: background 0.5s;
-}
-
-.video-player-message {
-  margin-bottom: 16px;
-  font-family: 'Fira Mono', monospace;
-  text-transform: lowercase;
-  font-size: 1.2rem;
-  letter-spacing: 0.01em;
-  color: #111;
-  text-align: center;
-  background: transparent;
-}
-
-.video-player-toggle {
-  margin-bottom: 24px;
-  padding: 8px 20px;
-  border-radius: 8px;
-  border: none;
-  background: #000000;
-  color: #f7f7f7;
-  font-weight: 700;
-  font-size: 1rem;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  font-family: 'Fira Mono', monospace;
-  text-transform: lowercase;
-  transition: background 0.3s, color 0.3s;
-}
-
-.video-player-toggle.lights-on {
-  background: #f7f7f7;
-  color: #111;
+  background-color: #000;
+  overflow: hidden;
 }
 
 .video-player-video {
-  width: 90vw;
-  max-width: 700px;
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  aspect-ratio: 16/9;
   background: #000;
   border-radius: 12px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.315);
+  overflow: hidden;
+  cursor: none !important; /* Erzwinge keinen Cursor */
 }
 
+.video-player-video iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  /* Entferne pointer-events: none, damit Klicks funktionieren */
+}
+
+/* Entferne alle anderen Stile, die nicht mehr benötigt werden */
 .switch-container {
   position: relative;
-  width: 160px;
-  height: 160px;
-  margin: 0 auto 32px auto;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
 }
 
 .switch-image {
@@ -72,8 +57,8 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 180px;
-  height: 180px;
+  width: 90px;
+  height: 90px;
   background: radial-gradient(circle, rgba(255, 165, 0, 0.2) 0%, rgba(255, 165, 0, 0) 60%);
   border-radius: 50%;
   z-index: 1;
@@ -86,19 +71,13 @@
   opacity: 1;
 }
 
-.click-zone {
-  position: absolute;
-  width: 100%;
-  height: 50%;
-  z-index: 3;
-  left: 0;
-  cursor: pointer;
+/* Media query for mobile devices */
+@media (max-width: 768px) {
+  .video-container {
+    flex-direction: column;
+  }
+  
+  .switch-container {
+    margin-top: 20px;
+  }
 }
-
-.top-zone {
-  top: 0;
-}
-
-.bottom-zone {
-  bottom: 0;
-} 

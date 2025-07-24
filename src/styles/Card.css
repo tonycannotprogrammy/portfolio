@@ -129,13 +129,27 @@ body {
 .bc-tel a {
   color: #000000;
   text-decoration: none;
+  transition: text-decoration 0.2s ease;
 }
 
 .bc-email a:hover,
 .bc-tel a:hover {
-  text-decoration: underline;
+  text-decoration: underline !important;
   cursor: pointer;
 }
+
+/* Entferne diese widersprüchlichen Regeln */
+/* 
+.bc-email a {
+  color: #000000;
+  text-decoration: none;
+}
+
+.bc-email a:hover {
+  text-decoration: none;
+  cursor: pointer;
+}
+*/
 
 .bc-email,
 .bc-tel {
