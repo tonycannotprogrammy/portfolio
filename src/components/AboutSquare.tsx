@@ -78,11 +78,19 @@ const About: React.FC = () => {
 
   // On click: if animating, skip; if done, toggle links/text (mobile only)
   const handleTextClick = () => {
-    if (!isSkipping && displayed.length < ABOUT_TEXT.length) {
-      setIsSkipping(true);
-    } else if (isMobile()) {
-      // Only toggle links list on mobile
-      setShowLinksList(l => !l);
+    if (isMobile()) {
+      // On mobile: first click always shows links list
+      if (!isSkipping && displayed.length < ABOUT_TEXT.length) {
+        setIsSkipping(true);
+        setShowLinksList(true);
+      } else {
+        setShowLinksList(l => !l);
+      }
+    } else {
+      // On desktop: only skip animation, never show links list
+      if (!isSkipping && displayed.length < ABOUT_TEXT.length) {
+        setIsSkipping(true);
+      }
     }
   };
 
@@ -251,7 +259,7 @@ const About: React.FC = () => {
 
   return (
     <div className="about-square-container" style={{ minHeight: '100vh', minWidth: '100vw', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="about-square-text" style={{ width: '100%', background: 'rgba(255,255,255,0.98)', borderRadius: 18, padding: '4vw 3vw', cursor: 'pointer' }} onClick={handleTextClick}>
+      <div className="about-square-text" style={{ width: '100%', background: '#f7f7f7', borderRadius: 18, padding: '4vw 3vw', cursor: 'pointer' }} onClick={handleTextClick}>
         {showLinksList ? renderLinksList() : (
           <>
             {renderTextWithOverlays(textToDisplay)}

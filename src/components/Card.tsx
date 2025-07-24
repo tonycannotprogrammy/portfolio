@@ -8,6 +8,9 @@ const Card: React.FC = () => {
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [exit, setExit] = useState(false); // NEW
   const [enter, setEnter] = useState(true); // For slide-in
+  const [isDesktop, setIsDesktop] = useState(
+    typeof window !== 'undefined' && window.innerWidth > 812
+  );
   const cardRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -85,6 +88,17 @@ const Card: React.FC = () => {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    const checkDesktop = () => setIsDesktop(window.innerWidth > 812);
+    window.addEventListener('resize', checkDesktop);
+    window.addEventListener('orientationchange', checkDesktop);
+    checkDesktop();
+    return () => {
+      window.removeEventListener('resize', checkDesktop);
+      window.removeEventListener('orientationchange', checkDesktop);
+    };
+  }, []);
+
   return (
     <>
       <div className="rotate-message">
@@ -92,7 +106,15 @@ const Card: React.FC = () => {
       </div>
       <div
         className="card-container"
-        style={{ position: 'relative' }}
+        style={{
+          position: 'relative',
+          minHeight: '100vh',
+          minWidth: '100vw',
+          backgroundImage: isDesktop ? "url('/portrait.jpeg')" : 'none',
+          backgroundSize: isDesktop ? 'cover' : undefined,
+          backgroundPosition: isDesktop ? 'center' : undefined,
+          backgroundRepeat: isDesktop ? 'no-repeat' : undefined
+        }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
