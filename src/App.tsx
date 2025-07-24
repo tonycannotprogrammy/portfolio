@@ -44,8 +44,6 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
   const scrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const [showCursor, setShowCursor] = useState(true);
-  const isDragging = useRef(false);
-  const lastY = useRef(0);
 
   useEffect(() => {
     const checkMobile = () => setShowCursor(window.innerWidth > 812);
@@ -153,8 +151,6 @@ function useIsMobile() {
 }
 
 const App: React.FC = () => {
-  const isMobile = useIsMobile();
-
   return (
     <Router>
       <ScrollPaginationWrapper>
