@@ -141,7 +141,7 @@ const Card: React.FC = () => {
               </div>
               <div className="bc-row bc-space"></div>
               <div className="bc-row">
-                <span className="bc-small">kontakt</span>
+                <span className="bc-small">contact</span>
                 <span className="bc-email">
                   <a href="mailto:tony@tonytoskal.io" onClick={stopFlip}>
                     tony@tonytoskal.io
