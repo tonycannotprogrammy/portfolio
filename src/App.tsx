@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState, createContext } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation, Link } from "react-router-dom";
 import Card from "./components/Card";
-import About from "./components/AboutSquare";
-import VideoPlayer from "./components/VideoPlayer";
-import SocialSlotPage from "./components/SocialSlotPage";
+import UnderConstruction from "./components/UnderConstruction";
+import LinksPage from "./components/LinksPage";
 import "./styles/Card.css";
 
 // Erstelle einen Kontext für den Cursor-Status
@@ -158,6 +157,15 @@ const App: React.FC = () => {
   return (
     <Router>
       <ScrollPaginationWrapper>
+        <div className="top-left-nav">
+          <Link to="/about" className="nav-link">About</Link>
+          {" / "}
+          <Link to="/works" className="nav-link">Works</Link>
+          {" / "}
+          <Link to="/" className="nav-link">Card</Link>
+          {" / "}
+          <Link to="/links" className="nav-link">Links</Link>
+        </div>
         <Routes>
           <Route
             path="/"
@@ -169,31 +177,9 @@ const App: React.FC = () => {
               </>
             }
           />
-          <Route
-            path="/about"
-            element={
-              <div className="section section-card">
-                <About />
-              </div>
-            }
-          />
-          <Route path="/about-me" element={<Navigate to="/about" replace />} />
-          <Route
-            path="/mundane"
-            element={
-              <div className="section section-card">
-                <VideoPlayer />
-              </div>
-            }
-          />
-          <Route
-            path="/socials"
-            element={
-              <div className="section section-card">
-                <SocialSlotPage />
-              </div>
-            }
-          />
+          <Route path="/about" element={<UnderConstruction />} />
+          <Route path="/works" element={<UnderConstruction />} />
+          <Route path="/links" element={<LinksPage />} />
         </Routes>
       </ScrollPaginationWrapper>
     </Router>

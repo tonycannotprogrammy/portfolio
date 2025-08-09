@@ -9,7 +9,7 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^7.6.3",
-    "react-scripts": "^5.0.1",
+    "react-scripts": "5.0.1",
     "styled-components": "^6.1.19",
     "tailwindcss": "^4.1.11",
     "typescript": "^4.0.0"

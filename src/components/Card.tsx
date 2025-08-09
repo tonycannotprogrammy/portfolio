@@ -1,18 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useNavigate } from "react-router-dom";
 import '../styles/Card.css';
 import qrcode from '../assets/qrcode.svg';
 
 const Card: React.FC = () => {
   const [flipped, setFlipped] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
-  const [exit, setExit] = useState(false); // NEW
   const [enter, setEnter] = useState(true); // For slide-in
   const [isDesktop, setIsDesktop] = useState(
     typeof window !== 'undefined' && window.innerWidth > 812
   );
   const cardRef = useRef<HTMLDivElement>(null);
-  const navigate = useNavigate();
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const card = cardRef.current;
@@ -71,16 +68,6 @@ const Card: React.FC = () => {
     return `${flip} ${tiltStr}`;
   };
 
-  // Handler for "designer." link
-  const handleDesignerClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setExit(true);
-    setTimeout(() => {
-      navigate("/about");
-    }, 600); // Match the animation duration
-  };
-
   useEffect(() => {
     document.title = "tony's card";
     setEnter(true);
@@ -119,14 +106,12 @@ const Card: React.FC = () => {
         onMouseLeave={handleMouseLeave}
       >
         <div
-          className={`card${flipped ? " flipped" : ""}${exit ? " card-exit-left" : ""}${enter ? " card-enter-left" : ""}`}
+        className={`card${flipped ? " flipped" : ""}${enter ? " card-enter-left" : ""}`}
           ref={cardRef}
           style={{
             transform: getTransform(),
             transition:
-              exit
-                ? 'transform 0.6s cubic-bezier(.77,0,.18,1)'
-                : enter
+              enter
                 ? 'transform 0.6s cubic-bezier(.77,0,.18,1)'
                 : 'transform 0.25s cubic-bezier(.03,.98,.52,.99)',
           }}
@@ -135,13 +120,7 @@ const Card: React.FC = () => {
           <div className="card-side front">
             <div className="business-card">
               <div className="bc-row bc-tight">
-                <a
-                  href="/about"
-                  className="aboutme-link"
-                  onClick={handleDesignerClick}
-                >
-                  designer.
-                </a>
+                <span className="aboutme-link">designer.</span>
               </div>
               <div className="bc-row bc-tight">
                 <span className="bc-name">
