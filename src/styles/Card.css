@@ -87,6 +87,14 @@ body {
 .svg-card { width: 100%; height: 100%; display: block; }
 .svg-card .svg-hover-underline:hover { text-decoration: underline; cursor: pointer; }
 
+/* Mobile boost: make SVG text a bit larger on small screens */
+@media (max-width: 600px) {
+  .svg-card .svg-name  { font-size: 205px !important; }
+  .svg-card .svg-role  { font-size: 90px !important; }
+  .svg-card .svg-label { font-size: 100px !important; }
+  .svg-card .svg-value { font-size: 100px !important; }
+}
+
 .corner-hover {
   position: fixed;
   z-index: 50;
