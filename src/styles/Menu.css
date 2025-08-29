@@ -1,0 +1,101 @@
+/* Desktop top-left navigation */
+.top-left-nav {
+  position: fixed;
+  top: 12px;
+  left: 16px;
+  z-index: 1000;
+  font-family: 'Xanh Mono', monospace;
+  font-size: clamp(0.9rem, 2vw, 1.1rem); /* slightly smaller on desktop */
+  color: #000;
+  user-select: none;
+}
+
+.top-left-nav a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.top-left-nav a:hover {
+  text-decoration: underline;
+}
+
+/* Active route underline */
+.top-left-nav .nav-link.active {
+  text-decoration: underline;
+}
+
+/* Hide fixed desktop nav on small screens */
+@media (max-width: 812px) {
+  .top-left-nav { display: none; }
+}
+
+/* Mobile hamburger menu + overlay */
+.mobile-menu {
+  position: fixed;
+  top: 12px;
+  left: 16px;
+  z-index: 1200; /* above overlay so it's never blurred */
+}
+
+/* hidden on desktop */
+@media (min-width: 813px) {
+  .mobile-menu { display: none; }
+}
+
+.hamburger {
+  width: 42px;
+  height: 34px;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  position: relative;
+  z-index: 1201; /* ensure on top of overlay and its blur */
+}
+.hamburger span {
+  display: block;
+  width: 32px;
+  height: 2px; /* thinner */
+  background: #000;
+  transition: transform 200ms ease, opacity 200ms ease;
+}
+.hamburger.open span:nth-child(1) { transform: translateY(9px) rotate(45deg); }
+.hamburger.open span:nth-child(2) { opacity: 0; }
+.hamburger.open span:nth-child(3) { transform: translateY(-9px) rotate(-45deg); }
+
+.mobile-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  z-index: 1100; /* same layer as links; hamburger sits above */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  text-align: center;
+  font-family: 'Xanh Mono', monospace;
+  font-size: clamp(1.6rem, 6vw, 2.2rem); /* larger on mobile */
+  transition: font-size 180ms ease;
+}
+.mobile-nav.open {
+  font-size: clamp(1.9rem, 7vw, 2.6rem);
+}
+.mobile-nav a {
+  color: #000;
+  text-decoration: none;
+}
+.mobile-nav a.active, .mobile-nav a:hover {
+  text-decoration: underline;
+}

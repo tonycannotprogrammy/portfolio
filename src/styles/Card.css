@@ -1,6 +1,5 @@
 body {
   background-color: #f7f7f7;
-  /* background-image: url('/portrait.jpg'); */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -20,11 +19,25 @@ body {
   align-items: center;
   padding: 2vw;
   box-sizing: border-box;
+  background-color: #f7f7f7;
+}
+
+/* Crossfading background layers for front/back portrait */
+.bg-layer {
+  position: absolute;
+  inset: 0;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #f7f7f7;
+  /* instant switch: no transition */
+  transition: none;
+  opacity: 0;
+  z-index: 0;
+  pointer-events: none; /* never intercept clicks */
 }
+
+/* Front content now uses inline SVG (SvgCardContent). 
+   Legacy fixed-card rules removed to reduce redundancy. */
 
 .card {
   position: relative;
@@ -70,6 +83,10 @@ body {
   font-weight: 600;
 }
 
+/* SVG content should fill the card face */
+.svg-card { width: 100%; height: 100%; display: block; }
+.svg-card .svg-hover-underline:hover { text-decoration: underline; cursor: pointer; }
+
 .corner-hover {
   position: fixed;
   z-index: 50;
@@ -77,94 +94,11 @@ body {
   background: rgba(255, 0, 0, 0);
 }
 
-.business-card {
-  width: 100%;
-  height: 100%;
-  font-family: 'Satoshi', Arial, sans-serif;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start;
-  padding: 24px 24px 16px 24px;
-  box-sizing: border-box;
-  position: relative;
-  z-index: 10;
-}
-
-.bc-row {
-  display: flex;
-  align-items: baseline;
-  margin-bottom: 0.10em;
-}
-
-.bc-row.bc-tight {
-  margin-bottom: -1em; /* No space between designer. and TONY TOSKALIO */
-}
-
-.bc-row.bc-tight + .bc-row.bc-tight {
-  margin-top: -0.2em; /* Try -0.2em or adjust as needed */
-}
-
-.bc-space {
-  margin-bottom: 3em; /* Larger space after the name */
-}
-
-
-.bc-email,
-.bc-tel {
-  flex-grow: 1;
-  text-align: right;
-}
-
-.bc-name {
-  font-size: 3.5rem;
-  font-weight: 600;   /* Only the name is bold */
-  letter-spacing: 0.01em;
-  margin-top: 0.1em;
-  margin-bottom: 0.1em;
-  text-transform: uppercase;
-  user-select: text; /* Allow selection only for the name */
-}
-
-.bc-email a,
-.bc-tel a {
-  color: #000000;
-  text-decoration: none;
-  transition: text-decoration 0.2s ease;
-}
-
-.bc-email a:hover,
-.bc-tel a:hover {
-  text-decoration: underline !important;
-  cursor: pointer;
-}
-
-/* Entferne diese widersprüchlichen Regeln */
-/* 
-.bc-email a {
-  color: #000000;
-  text-decoration: none;
-}
-
-.bc-email a:hover {
-  text-decoration: none;
-  cursor: pointer;
-}
-*/
-
-.bc-email,
-.bc-tel {
-  margin-left: 0.5em; /* Reduce space between label and value */
-}
-
-/* Optional: Make sure the card never overflows on very small screens */
+/* Legacy business-card rules removed (front uses SVG). */
+/* Disable selection on everything within the 3D card to avoid text selection when flipping */
+.card, .card * { user-select: none !important; -webkit-user-select: none; }
+/* Mobile housekeeping only; do not change layout sizing */
 @media (max-width: 600px) {
-  .card {
-    max-width: 98vw;
-    max-height: 60vw;
-  }
-  .card-container {
-    padding: 1vw;
-  }
   body,
   .card-container {
     background-image: none !important;
@@ -174,33 +108,8 @@ body {
   }
 }
 
-/* Hide card and show message in portrait mode */
-@media screen and (orientation: portrait) {
-  .card-container {
-    display: none !important;
-  }
-  .rotate-message {
-    display: flex !important;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-size: 1.5rem;
-    color: #333;
-    background: #f7f7f7;
-    text-align: center;
-    padding: 2em;
-  }
-}
-
-/* Show card and hide message in landscape */
-@media screen and (orientation: landscape) {
-  .card-container {
-    display: flex !important;
-  }
-  .rotate-message {
-    display: none !important;
-  }
-}
+/* Always hide rotate message; keep card visible on mobile portrait */
+.rotate-message { display: none !important; }
 
 .rotate-message {
   font-family: 'Xanh Mono', monospace;
@@ -229,75 +138,15 @@ body {
   color: #000;
 }
 
-/* Make all text regular by default */
-.business-card,
-.bc-row,
-.bc-small,
-.bc-email,
-.bc-tel {
-  font-weight: 400;
-}
 
-/* Only the name is bold */
-.bc-name {
-  font-size: 3.5rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  margin-top: 0.1em;
-  margin-bottom: 0.1em;
-  text-transform: uppercase;
-}
-
-.aboutme-link {
-  color: inherit;
-  text-decoration: none;
-  display: inline-block;
-  padding: 4px 10px 4px 0;
-  position: relative;
-  z-index: 10;
-  border-bottom: 2px solid transparent;
-  transition: border-color 0.2s;
-}
-
-.aboutme-link:hover {
-  text-decoration: none;
-}
 
 /* Top-left navigation */
-.top-left-nav {
-  position: fixed;
-  top: 12px;
-  left: 16px;
-  z-index: 1000;
-  font-family: 'Xanh Mono', monospace;
-  font-size: clamp(1rem, 2.4vw, 1.3rem);
-  color: #000;
-  user-select: none;
-}
+/* moved nav styles to src/styles/Menu.css */
 
-.top-left-nav a {
-  color: inherit;
-  text-decoration: none;
-}
+/* Mobile hamburger menu + overlay */
+/* moved mobile menu styles to src/styles/Menu.css */
 
-.top-left-nav a:hover {
-  text-decoration: underline;
-}
-
-/* Under-construction message style */
-.uc-message {
-  font-family: 'Xanh Mono', monospace;
-  text-transform: lowercase;
-  font-size: clamp(1.2rem, 3vw, 2rem);
-  letter-spacing: 0.01em;
-  color: #333;
-  background: #f7f7f7;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  width: 100vw;
-}
+/* moved uc-message to src/styles/Common.css */
 
 @media (max-width: 600px), (max-height: 500px) {
   .corner-hover {
@@ -343,10 +192,7 @@ body {
   }
 }
 
-/* Force cursor: none everywhere, even on links and buttons */
-*, *:hover, a, a:hover, button, button:hover {
-  cursor: none !important;
-}
+/* moved custom cursor rule to src/styles/Layout.css */
 
 /* Hide scrollbars for all browsers */
 html, body {
@@ -476,4 +322,3 @@ html, body {
     animation: wiggle 220ms ease-in-out;
   }
 }
-

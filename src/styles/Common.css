@@ -1,0 +1,15 @@
+/* Under-construction message style (reusable) */
+.uc-message {
+  font-family: 'Xanh Mono', monospace;
+  text-transform: lowercase;
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  letter-spacing: 0.01em;
+  color: #333;
+  background: #f7f7f7;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+}
+

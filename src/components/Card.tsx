@@ -1,15 +1,23 @@
 import React, { useState, useRef, useEffect } from 'react';
 import '../styles/Card.css';
 import qrcode from '../assets/qrcode.svg';
+import SvgCardContent from './SvgCardContent';
 
 const Card: React.FC = () => {
   const [flipped, setFlipped] = useState(false);
   const [tilt, setTilt] = useState({ x: 0, y: 0 });
   const [enter, setEnter] = useState(true); // For slide-in
+  const [scale, setScale] = useState(1);
   const [isDesktop, setIsDesktop] = useState(
     typeof window !== 'undefined' && window.innerWidth > 812
   );
   const cardRef = useRef<HTMLDivElement>(null);
+  const businessRef = useRef<HTMLDivElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLSpanElement>(null);
+  const [nameWidth, setNameWidth] = useState<number | null>(null);
+  const [baseWidth, setBaseWidth] = useState<number | null>(null);
+  const [centerWidth, setCenterWidth] = useState<number | null>(null);
 
   const handleMouseMove = (e: React.MouseEvent) => {
     const card = cardRef.current;
@@ -64,12 +72,16 @@ const Card: React.FC = () => {
 
   const getTransform = () => {
     const flip = flipped ? 'rotateY(180deg)' : '';
+    if (!isDesktop) {
+      // Disable tilt on mobile; only apply flip
+      return `${flip}`.trim();
+    }
     const tiltStr = `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`;
     return `${flip} ${tiltStr}`;
   };
 
   useEffect(() => {
-    document.title = "tony's card";
+    document.title = "tony's card.";
     setEnter(true);
     const timer = setTimeout(() => setEnter(false), 600);
     return () => clearTimeout(timer);
@@ -86,25 +98,117 @@ const Card: React.FC = () => {
     };
   }, []);
 
+  // Preload background images for smooth crossfade on flip
+  useEffect(() => {
+    const img1 = new Image();
+    const img2 = new Image();
+    img1.src = '/portrait.jpeg';
+    img2.src = '/portrait_back.jpeg';
+    return () => { /* noop cleanup */ };
+  }, []);
+
+  // Scale inner content to fit available width and height (base 500px width, measured base height)
+  useEffect(() => {
+    const el = businessRef.current;
+    const inner = innerRef.current;
+    if (!el || !inner) return;
+    // Measure real unscaled inner width/height; no fixed BASE
+    const update = () => {
+      const cs = getComputedStyle(el);
+      const padX = parseFloat(cs.paddingLeft || '0') + parseFloat(cs.paddingRight || '0');
+      const padY = parseFloat(cs.paddingTop || '0') + parseFloat(cs.paddingBottom || '0');
+      const availW = Math.max(0, el.clientWidth - padX);
+      const availH = Math.max(0, el.clientHeight - padY);
+      const baseW = inner.scrollWidth; // unscaled layout width
+      const baseH = inner.scrollHeight; // unscaled layout height
+      setBaseWidth(baseW);
+      const sW = baseW > 0 ? (availW / baseW) : 1;
+      const sH = baseH > 0 ? (availH / baseH) : 1;
+      const s = Math.max(0.01, Math.min(1, sW, sH));
+      setScale(s || 1);
+      setCenterWidth(baseW * s);
+    };
+    update();
+    // Ensure measurements run again after web fonts load (avoids FOUT-induced shifts)
+    // @ts-ignore
+    if (document.fonts && document.fonts.ready) {
+      // @ts-ignore
+      document.fonts.ready.then(update).catch(() => {});
+    }
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    ro.observe(inner);
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+    };
+  }, []);
+
+  // Measure name width to align left/right bounds for other rows
+  useEffect(() => {
+    const n = nameRef.current;
+    if (!n) return;
+    const update = () => setNameWidth(n.offsetWidth || null);
+    update();
+    // Re-measure after fonts load so width reflects final metrics
+    // @ts-ignore
+    if (document.fonts && document.fonts.ready) {
+      // @ts-ignore
+      document.fonts.ready.then(update).catch(() => {});
+    }
+    const ro = new ResizeObserver(update);
+    ro.observe(n);
+    window.addEventListener('resize', update);
+    window.addEventListener('orientationchange', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+      window.removeEventListener('orientationchange', update);
+    };
+  }, []);
+
+  // Keep center column equal to the visual name width (scaled)
+  useEffect(() => {
+    if (nameWidth != null && !Number.isNaN(scale)) {
+      setCenterWidth(nameWidth * scale);
+    }
+  }, [nameWidth, scale]);
+
   return (
     <>
-      <div className="rotate-message">
-        please rotate your device horizontally.
-      </div>
       <div
         className="card-container"
         style={{
           position: 'relative',
           minHeight: '100vh',
           minWidth: '100vw',
-          backgroundImage: isDesktop ? "url('/portrait.jpeg')" : 'none',
-          backgroundSize: isDesktop ? 'cover' : undefined,
-          backgroundPosition: isDesktop ? 'center' : undefined,
-          backgroundRepeat: isDesktop ? 'no-repeat' : undefined
         }}
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
+        {isDesktop && (
+          <>
+            <div
+              className="bg-layer"
+              style={{
+                backgroundImage: "url('/portrait.jpeg')",
+                opacity: flipped ? 0 : 1,
+              }}
+              aria-hidden
+            />
+            <div
+              className="bg-layer"
+              style={{
+                backgroundImage: "url('/portrait_back.jpeg')",
+                opacity: flipped ? 1 : 0,
+              }}
+              aria-hidden
+            />
+          </>
+        )}
         <div
         className={`card${flipped ? " flipped" : ""}${enter ? " card-enter-left" : ""}`}
           ref={cardRef}
@@ -118,45 +222,7 @@ const Card: React.FC = () => {
           onClick={handleCardClick}
         >
           <div className="card-side front">
-            <div className="business-card">
-              <div className="bc-row bc-tight">
-                <span className="aboutme-link">designer.</span>
-              </div>
-              <div className="bc-row bc-tight">
-                <span className="bc-name">
-                  TONY&nbsp;T
-                  <a
-                    href="http://www.oszko.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ textDecoration: 'none', color: 'inherit', cursor: 'pointer' }}
-                    aria-label="Secret Link"
-                    tabIndex={-1}
-                    onClick={stopFlip}
-                  >
-                    OSK
-                  </a>
-                  ALIO
-                </span>
-              </div>
-              <div className="bc-row bc-space"></div>
-              <div className="bc-row">
-                <span className="bc-small">contact</span>
-                <span className="bc-email">
-                  <a href="mailto:tony@tonytoskal.io" onClick={stopFlip}>
-                    tony@tonytoskal.io
-                  </a>
-                </span>
-              </div>
-              <div className="bc-row">
-                <span className="bc-small">tel</span>
-                <span className="bc-tel">
-                  <a href="tel:+436787903718" onClick={stopFlip}>
-                    0.678.790 37 18
-                  </a>
-                </span>
-              </div>
-            </div>
+            <SvgCardContent onLinkClick={stopFlip} />
           </div>
           <div className="card-side back">
             <img

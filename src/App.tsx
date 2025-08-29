@@ -1,8 +1,10 @@
 import React, { useEffect, useRef, useState, createContext } from "react";
-import { BrowserRouter as Router, Routes, Route, useLocation, Link } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import Card from "./components/Card";
 import UnderConstruction from "./components/UnderConstruction";
 import LinksPage from "./components/LinksPage";
+import TopMenu from "./components/TopMenu";
+import MobileMenu from "./components/MobileMenu";
 import "./styles/Card.css";
 
 // Erstelle einen Kontext für den Cursor-Status
@@ -15,7 +17,7 @@ const appCursorStyle: React.CSSProperties = {
   cursor: "none",
 };
 
-const CustomCursor: React.FC<{ visible: boolean }> = ({ visible }) => {
+const CustomCursor: React.FC<{ visible: boolean; pressed: boolean }> = ({ visible, pressed }) => {
   const [pos, setPos] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -26,21 +28,22 @@ const CustomCursor: React.FC<{ visible: boolean }> = ({ visible }) => {
 
   if (!visible) return null;
 
+  const baseSize = 40;
   return (
     <div
       style={{
         position: "fixed",
-        left: pos.x - 20,
-        top: pos.y - 20,
-        width: 40,
-        height: 40,
+        left: pos.x,
+        top: pos.y,
+        width: baseSize,
+        height: baseSize,
         borderRadius: "50%",
         background: "#fff",
         pointerEvents: "none",
         mixBlendMode: "difference",
         zIndex: 9999,
-        // Remove transition for instant movement
-        transition: "none",
+        transform: `translate(-50%, -50%) scale(${pressed ? 0.65 : 1})`,
+        transition: "transform 120ms ease",
       }}
     />
   );
@@ -51,6 +54,7 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
   const location = useLocation();
   const [showCursor, setShowCursor] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
+  const [cursorPressed, setCursorPressed] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -141,10 +145,25 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
     };
   }, []);
 
+  // Cursor press animation on desktop
+  useEffect(() => {
+    if (isMobile) return;
+    const down = () => setCursorPressed(true);
+    const up = () => setCursorPressed(false);
+    window.addEventListener("mousedown", down);
+    window.addEventListener("mouseup", up);
+    window.addEventListener("blur", up);
+    return () => {
+      window.removeEventListener("mousedown", down);
+      window.removeEventListener("mouseup", up);
+      window.removeEventListener("blur", up);
+    };
+  }, [isMobile]);
+
   return (
     <CursorContext.Provider value={{ showCursor, setShowCursor }}>
-      <div style={appCursorStyle}>
-        {!isMobile && <CustomCursor visible={showCursor} />}
+      <div style={!isMobile ? appCursorStyle : undefined}>
+        {!isMobile && <CustomCursor visible={showCursor} pressed={cursorPressed} />}
         <div className="scroll-container" ref={scrollRef}>
           {children}
         </div>
@@ -153,19 +172,27 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
   );
 };
 
+const TitleUpdater: React.FC = () => {
+  const location = useLocation();
+  useEffect(() => {
+    const map: Record<string, string> = {
+      "/": "tony's card.",
+      "/works": "tony's works.",
+      "/about": "about tony.",
+      "/links": "tony's links.",
+    };
+    document.title = map[location.pathname] ?? "tony's card.";
+  }, [location.pathname]);
+  return null;
+};
+
 const App: React.FC = () => {
   return (
     <Router>
       <ScrollPaginationWrapper>
-        <div className="top-left-nav">
-          <Link to="/about" className="nav-link">About</Link>
-          {" / "}
-          <Link to="/works" className="nav-link">Works</Link>
-          {" / "}
-          <Link to="/" className="nav-link">Card</Link>
-          {" / "}
-          <Link to="/links" className="nav-link">Links</Link>
-        </div>
+        <TitleUpdater />
+        <TopMenu />
+        <MobileMenu />
         <Routes>
           <Route
             path="/"

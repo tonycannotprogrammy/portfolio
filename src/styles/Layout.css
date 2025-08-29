@@ -1,0 +1,31 @@
+/* Global layout + scroll behavior */
+html, body {
+  overflow: hidden;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+/* Prevent iOS "text size adjust" from inflating fonts and shifting layout */
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+.scroll-container {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  position: relative;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;  /* IE and Edge */
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* Desktop-only custom cursor behavior (paired with App logic) */
+@media (min-width: 813px) {
+  *, *:hover, a, a:hover, button, button:hover {
+    cursor: none !important;
+  }
+}

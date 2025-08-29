@@ -9,17 +9,18 @@
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-router-dom": "^7.6.3",
-    "react-scripts": "5.0.1",
     "styled-components": "^6.1.19",
     "tailwindcss": "^4.1.11",
     "typescript": "^4.0.0"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject",
-    "dev": "react-scripts start",
+    "start": "vite",
+    "build": "vite build",
+    "test": "echo \"No tests configured\"",
+    "dev": "vite",
+    "dev:host": "vite --host",
+    "preview": "vite preview",
+    "preview:host": "vite preview --host",
     "deploy": "npm run build && wrangler deploy"
   },
   "eslintConfig": {
@@ -45,6 +46,8 @@
     "@types/d3-delaunay": "^6.0.4",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@types/styled-components": "^5.1.34"
+    "@types/styled-components": "^5.1.34",
+    "@vitejs/plugin-react-swc": "^3.7.1",
+    "vite": "^5.4.0"
   }
 }
