@@ -1,0 +1,6 @@
+pages_build_output_dir = "dist"
+
+# Optional: if you later add Functions, set the directory here
+# [build]
+# upload.format = "modules"
+
