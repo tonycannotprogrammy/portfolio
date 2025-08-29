@@ -21,7 +21,7 @@
     "dev:host": "vite --host",
     "preview": "vite preview",
     "preview:host": "vite preview --host",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy": "npm run build && wrangler pages deploy dist"
   },
   "eslintConfig": {
     "extends": [
