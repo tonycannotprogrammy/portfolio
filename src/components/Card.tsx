@@ -222,7 +222,7 @@ const Card: React.FC = () => {
           onClick={handleCardClick}
         >
           <div className="card-side front">
-            <SvgCardContent onLinkClick={stopFlip} />
+            <SvgCardContent onLinkClick={stopFlip} isMobile={!isDesktop} />
           </div>
           <div className="card-side back">
             <img
