@@ -89,7 +89,8 @@ body {
 
 /* Mobile boost: make SVG text a bit larger on small screens */
 @media (max-width: 600px) {
-  .svg-card .svg-name  { font-size: 205px !important; }
+  /* Keep name same as desktop to avoid overflow on phones */
+  /* .svg-card .svg-name  { no override } */
   .svg-card .svg-role  { font-size: 90px !important; }
   .svg-card .svg-label { font-size: 100px !important; }
   .svg-card .svg-value { font-size: 100px !important; }
