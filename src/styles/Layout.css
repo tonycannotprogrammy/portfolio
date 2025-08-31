@@ -32,3 +32,9 @@ html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
     cursor: none !important;
   }
 }
+
+/* Explicit root class to hard-disable native cursor when custom cursor is active */
+.hide-native-cursor *,
+.hide-native-cursor *:hover {
+  cursor: none !important;
+}

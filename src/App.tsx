@@ -116,7 +116,6 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
       mouseDown = true;
       startY = e.clientY;
       startScroll = scrollContainer.scrollTop;
-      scrollContainer.style.cursor = "grabbing";
       document.body.style.userSelect = "none";
     }
     function onMouseMove(e: MouseEvent) {
@@ -128,7 +127,6 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
     function onMouseUp() {
       if (!scrollContainer) return;
       mouseDown = false;
-      scrollContainer.style.cursor = "auto";
       document.body.style.userSelect = "";
     }
     // Only enable on desktop
@@ -158,6 +156,16 @@ const ScrollPaginationWrapper: React.FC<{ children: React.ReactNode }> = ({ chil
       window.removeEventListener("mouseup", up);
       window.removeEventListener("blur", up);
     };
+  }, [isMobile]);
+
+  // Force-hide native cursor via root class; more robust than inline styles
+  useEffect(() => {
+    const root = document.documentElement;
+    if (!isMobile) {
+      root.classList.add("hide-native-cursor");
+      return () => root.classList.remove("hide-native-cursor");
+    }
+    root.classList.remove("hide-native-cursor");
   }, [isMobile]);
 
   return (
