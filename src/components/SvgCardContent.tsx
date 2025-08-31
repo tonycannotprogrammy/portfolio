@@ -7,17 +7,18 @@ type Props = {
 
 const SvgCardContent: React.FC<Props> = ({ onLinkClick, isMobile = false }) => {
   // Tunables for desktop vs mobile portrait
-  const LEFT = isMobile ? 140 : 160;
-  const RIGHT_EDGE = isMobile ? 1480 : 1540; // visual right column edge
-  const SAFE_RIGHT = isMobile ? 1460 : 1520; // small padding from the edge
+  const LEFT = isMobile ? 120 : 140;                // closer to left edge, but safe
+  const RIGHT_EDGE = isMobile ? 1500 : 1560;        // extend a bit further to right
+  const SAFE_RIGHT = isMobile ? 1480 : 1540;        // values sit slightly inside
   const NAME_Y = isMobile ? 330 : 340;
-  const NAME_SIZE = isMobile ? 175 : 185;
+  const NAME_SIZE = isMobile ? 160 : 170;           // a tad smaller to prevent overflow
   const ROLE_Y = isMobile ? 150 : 160;
   const LABEL_Y1 = isMobile ? 710 : 720;
   const LABEL_Y2 = isMobile ? 850 : 860;
   const LABEL_SIZE = isMobile ? 90 : 90;
   const VALUE_SIZE = isMobile ? 90 : 90;
-  const NAME_WIDTH = RIGHT_EDGE - LEFT; // available width for the name
+  const NAME_MARGIN = isMobile ? 20 : 24;           // keep a thin breathing room
+  const NAME_WIDTH = RIGHT_EDGE - LEFT - NAME_MARGIN; // available width for the name
 
   return (
     <svg className="svg-card" viewBox="0 0 1700 1100" preserveAspectRatio="xMidYMid meet">
@@ -27,8 +28,8 @@ const SvgCardContent: React.FC<Props> = ({ onLinkClick, isMobile = false }) => {
         <text x={LEFT} y={ROLE_Y} fontSize={80} fontWeight={400} className="svg-role">designer.</text>
 
         {/* Name (single line, bold). Using an anchor just for the OSK segment */}
-        {/* Fit-to-width name: forces exact line length so it never overflows */}
-        <text x={LEFT} y={NAME_Y} fontSize={NAME_SIZE} fontWeight={700} textRendering="geometricPrecision" className="svg-name" textLength={NAME_WIDTH} lengthAdjust="spacingAndGlyphs">
+        {/* Fit-to-width name: adjust spacing only (no glyph squish) and keep a small margin */}
+        <text x={LEFT} y={NAME_Y} fontSize={NAME_SIZE} fontWeight={700} textRendering="geometricPrecision" className="svg-name" textLength={NAME_WIDTH} lengthAdjust="spacing">
           TONY T
           <a href="http://www.oszko.com" target="_blank" rel="noopener noreferrer" onClick={onLinkClick}>
             <tspan>OSK</tspan>
