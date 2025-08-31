@@ -9,6 +9,9 @@ html, body {
 /* Prevent iOS "text size adjust" from inflating fonts and shifting layout */
 html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
 
+/* Hint user agents and extensions: this site is light-mode only */
+:root { color-scheme: light; }
+
 .scroll-container {
   width: 100vw;
   height: 100vh;
